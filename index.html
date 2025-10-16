@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solo-Leveling Online HUD</title>
+<style>
+:root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#9aa4b2;--glass:rgba(255,255,255,0.03)}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071026,#081226,#0b1320);color:#e6eef6;padding:20px;font-family:Inter,ui-sans-serif,sans-serif}
+header{display:flex;gap:18px;align-items:center;margin-bottom:20px}
+h1,h2{margin:0}
+.container{display:grid;grid-template-columns:360px 1fr;gap:18px}
+.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
+.stats{display:flex;flex-direction:column;gap:12px}
+.stat-row{display:flex;justify-content:space-between;align-items:center}
+.stat-name{font-weight:600}
+.progress{height:12px;background:var(--glass);border-radius:8px;overflow:hidden;width:60%}
+.progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#06b6d4)}
+.level-box{display:flex;align-items:center;gap:12px}
+.level-circle{width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,#151a2a,#0b1220);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.04);}
+.btn{background:var(--accent);border:none;padding:8px 12px;border-radius:8px;color:white;font-weight:700;cursor:pointer}
+.muted{color:var(--muted);font-size:13px}
+main .card.large{min-height:520px}
+.controls{display:flex;gap:8px;margin-top:12px}
+.ex-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.ex-item{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px}
+.schedule{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.day{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;width:calc(33.333% - 6px)}
+label{display:flex;gap:8px;align-items:center}
+.tiny{font-size:12px;color:var(--muted)}
+footer{margin-top:12px;color:var(--muted);font-size:13px}
+.log{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:200px;overflow:auto;margin-top:12px}
+.row{display:flex;gap:8px;align-items:center}
+.profile{width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2);}
+@media(max-width:880px){.container{grid-template-columns:1fr}.day{width:48%}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="level-box card">
+    <div class="level-circle" id="levelCircle"><div id="levelVal">1</div></div>
+    <div>
+      <h1>Shadow Gym Online HUD</h1>
+      <div class="tiny muted">Train core, chest, shoulders, biceps, triceps, forearm, legs. Online leaderboard enabled.</div>
+      <img id="pfp" class="profile" src="" alt="Profile Picture" style="margin-top:6px;display:none">
+      <input type="file" id="uploadPfp" style="margin-top:6px;display:none">
+    </div>
+  </div>
+  <div style="margin-left:auto" class="card">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="btn" id="loginEmailBtn">Login Email</button>
+      <button class="btn" id="signupEmailBtn">Sign Up Email</button>
+      <button class="btn" id="loginGoogleBtn">Login Google</button>
+      <button class="btn" id="logoutBtn" style="display:none">Logout</button>
+      <div>
+        <div class="muted">XP</div>
+        <div id="xpCounter">0 / 100</div>
+      </div>
+      <button class="btn" id="syncBtn">Save / Load Data</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+<aside class="card">
+  <div class="stats" id="statsContainer"></div>
+  <div style="margin-top:6px" class="muted tiny">Tip: Use exercises or schedule to gain XP. Leveling increases stats.</div>
+</aside>
+
+<main>
+<div class="card large">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h2 style="margin:0">Exercises & Quick Train</h2>
+      <div class="tiny muted">Pick a muscle, choose intensity and train — get XP like a shadow hunter.</div>
+    </div>
+    <div class="row">
+      <select id="muscleSelect"></select>
+      <select id="intensity">
+        <option value="1">Light (x0.8)</option>
+        <option value="1.2" selected>Normal (x1.2)</option>
+        <option value="1.6">Hard (x1.6)</option>
+        <option value="2">Max (x2)</option>
+      </select>
+      <button class="btn" id="trainBtn">Quick Train</button>
+    </div>
+  </div>
+
+  <div class="ex-list" id="exerciseList"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+    <div>
+      <strong>B-List Weekly (Mon → Sat)</strong>
+      <div class="tiny muted">Tap a day's exercise to mark complete and gain XP.</div>
+    </div>
+    <div class="tiny muted">Auto-saves to your browser & server</div>
+  </div>
+
+  <div class="schedule" id="schedule"></div>
+  <div class="log" id="log"></div>
+  <footer>
+    <div class="tiny">Online Solo-Leveling HUD — leaderboard updates in real-time.</div>
+  </footer>
+</div>
+</main>
+</div>
+
+<script type="module">
+// ----- Firebase SDK -----
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ----- Firebase Config -----
+const firebaseConfig = {
+  apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
+  authDomain: "shadowgymsystem.firebaseapp.com",
+  projectId: "shadowgymsystem",
+  storageBucket: "shadowgymsystem.firebasestorage.app",
+  messagingSenderId: "396589716297",
+  appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
+  measurementId: "G-K0BMF5SG2K"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+
+// ----- HUD State -----
+const EXERCISES = {
+  core:[{name:'Plank (60s)',xp:12},{name:'Hanging Leg Raise x12',xp:18},{name:'Russian Twists x40',xp:10},{name:'Ab Wheel x10',xp:20}],
+  chest:[{name:'Push-ups x20',xp:10},{name:'Bench Press 8-12',xp:20},{name:'Incline Dumbbell Press 10',xp:18},{name:'Chest Fly 12',xp:14}],
+  shoulders:[{name:'Overhead Press 10',xp:20},{name:'Lateral Raise 12',xp:12},{name:'Front Raise 12',xp:10},{name:'Arnold Press 10',xp:18}],
+  biceps:[{name:'Barbell Curl 8-12',xp:18},{name:'Hammer Curl 10-12',xp:14},{name:'Concentration Curl 10',xp:12},{name:'Chin-ups 6-10',xp:24}],
+  triceps:[{name:'Close-grip Bench 6-10',xp:22},{name:'Tricep Dips x12',xp:16},{name:'Rope Pushdown 10-15',xp:12},{name:'Overhead Extension 10-12',xp:14}],
+  forearm:[{name:'Wrist Curls 3x15',xp:10},{name:'Reverse Wrist Curls 3x15',xp:10},{name:'Farmer Walk 60s',xp:18},{name:'Towel Hangs 30-60s',xp:12}],
+  legs:[{name:'Squats 10-15',xp:20},{name:'Lunges 12 each',xp:16},{name:'Deadlifts 8',xp:24},{name:'Leg Press 12',xp:18}]
+};
+const MUSCLES = Object.keys(EXERCISES);
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+let state = {level:1,xp:0,stats:Object.fromEntries(MUSCLES.map(m=>[m,0])),scheduleDone:{}};
+
+// ----- DOM Elements -----
+const xpCounter=document.getElementById('xpCounter');
+const levelVal=document.getElementById('levelVal');
+const statsContainer=document.getElementById('statsContainer');
+const exerciseList=document.getElementById('exerciseList');
+const scheduleEl=document.getElementById('schedule');
+const logEl=document.getElementById('log');
+const muscleSelect=document.getElementById('muscleSelect');
+const pfpEl=document.getElementById('pfp');
+const uploadPfp=document.getElementById('uploadPfp');
+
+// ----- Helpers -----
+function log(msg){logEl.innerHTML=`<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`+logEl.innerHTML;}
+function xpToNext(l){return 100*l;}
+function renderStats(){
+  statsContainer.innerHTML='';
+  MUSCLES.forEach(m=>{
+    const pct=Math.min(100,state.stats[m]);
+    const lv=1+Math.floor(state.stats[m]/100);
+    statsContainer.insertAdjacentHTML('beforeend',`<div class='stat-row'><div><div class='stat-name'>${m.charAt(0).toUpperCase()+m.slice(1)} <span class='tiny muted'>Lv ${lv}</span></div></div><div class='progress'><i style='width:${pct}%'></i></div></div>`);
+  });
+  levelVal.textContent=state.level;
+  xpCounter.textContent=Math.floor(state.xp)+' / '+xpToNext(state.level);
+}
+
+// ----- Award XP -----
+function awardXP(x,m){
+  state.xp+=x;
+  state.stats[m]+=Math.round(x);
+  while(state.xp>=xpToNext(state.level)){state.xp-=xpToNext(state.level);state.level++;log(`✨ Level Up → ${state.level}`);}
+  renderStats();
+  log(`+${x}XP to ${m}`);
+}
+
+// ----- Render Exercises -----
+MUSCLES.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m.charAt(0).toUpperCase()+m.slice(1);muscleSelect.appendChild(o);});
+function renderExercises(m){exerciseList.innerHTML='';EXERCISES[m].forEach(ex=>{const d=document.createElement('div');d.className='ex-item';d.innerHTML=`<strong>${ex.name}</strong><div class='tiny muted'>XP:${ex.xp}</div><button class='btn small' data-muscle='${m}' data-xp='${ex.xp}'>Do</button>`;exerciseList.appendChild(d);});exerciseList.querySelectorAll('button').forEach(b=>b.onclick=()=>awardXP(+b.dataset.xp,b.dataset.muscle));}
+muscleSelect.onchange=e=>renderExercises(e.target.value);
+renderExercises(muscleSelect.value);
+
+// ----- Render Schedule -----
+function renderSchedule(){
+  scheduleEl.innerHTML='';
+  DAYS.forEach((day,i)=>{
+    let focus=MUSCLES[i%MUSCLES.length];
+    const div=document.createElement('div');div.className='day';
+    div.innerHTML=`<strong>${day}</strong><div class='tiny muted'>${focus}</div>`;
+    EXERCISES[focus].slice(0,2).forEach((ex,ix)=>{
+      const id=`${day}-${ix}`;
+      div.insertAdjacentHTML('beforeend',`<label><input type='checkbox' data-day='${day}' data-muscle='${focus}' data-xp='${ex.xp}' id='${id}'/> ${ex.name} <span class='tiny muted'>${ex.xp}XP</span></label>`);
+    });
+    scheduleEl.appendChild(div);
+  });
+  scheduleEl.querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+    const {day,muscle,xp}=cb.dataset;
+    if(cb.checked){state.scheduleDone[day]=state.scheduleDone[day]||[];state.scheduleDone[day].push(cb.id);awardXP(+xp,muscle);log(`Completed ${day}: ${muscle}`);}
+  });
+}
+renderSchedule();
+renderStats();
+
+// ----- Quick Train -----
+document.getElementById('trainBtn').onclick=()=>{
+  const m=muscleSelect.value;
+  const i=+document.getElementById('intensity').value;
+  const ex=EXERCISES[m][Math.floor(Math.random()*EXERCISES[m].length)];
+  const g=Math.round(ex.xp*i);
+  awardXP(g,m);
+  log(`Trained ${m}: ${ex.name} (x${i}) → +${g}XP`);
+};
+
+// ----- Auth -----
+const provider = new GoogleAuthProvider();
+
+document.getElementById('loginGoogleBtn').onclick=()=>signInWithPopup(auth,provider).catch(e=>log(e.message));
+document.getElementById('logoutBtn').onclick=()=>signOut(auth);
+
+document.getElementById('loginEmailBtn').onclick=async()=>{
+  const email = prompt("Email"); const pass = prompt("Password");
+  try { await signInWithEmailAndPassword(auth,email,pass); } catch(e){log(e.message);}
+};
+document.getElementById('signupEmailBtn').onclick=async()=>{
+  const email = prompt("Email"); const pass = prompt("Password");
+  try { await createUserWithEmailAndPassword(auth,email,pass); log("Signed up!"); } catch(e){log(e.message);}
+};
+
+// ----- Sync to Firestore -----
+async function syncToServer(){
+  const user = auth.currentUser;
+  if(!user){alert("Login first!"); return;}
+  try{
+    await setDoc(doc(db,"users",user.uid),{
+      level: state.level,
+      xp: state.xp,
+      stats: state.stats,
+      scheduleDone: state.scheduleDone,
+      displayName: user.displayName||"",
+      photoURL: user.photoURL||"",
+      updatedAt: serverTimestamp()
+    });
+    log("✅ Synced to server.");
+    loadLeaderboard();
+  }catch(e){log("❌ Sync failed: "+e.message);}
+}
+document.getElementById('syncBtn').onclick=syncToServer;
+
+// ----- Profile picture -----
+uploadPfp.onchange = async function(){
+  const user = auth.currentUser;
+  if(!user) return;
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(){
+    await updateProfile(user,{photoURL:reader.result});
+    pfpEl.src = reader.result; pfpEl.style.display="block";
+    log("Profile picture updated.");
+  }
+  reader.readAsDataURL(file);
+}
+
+// ----- Auth State -----
+onAuthStateChanged(auth,user=>{
+  if(user){
+    document.getElementById('logoutBtn').style.display="inline-block";
+    document.getElementById('loginGoogleBtn').style.display="none";
+    document.getElementById('loginEmailBtn').style.display="none";
+    document.getElementById('signupEmailBtn').style.display="none";
+    if(user.photoURL){pfpEl.src=user.photoURL; pfpEl.style.display="block";}
+    uploadPfp.style.display="block";
+    loadUserData(user.uid);
+  }else{
+    document.getElementById('logoutBtn').style.display="none";
+    document.getElementById('loginGoogleBtn').style.display="inline-block";
+    document.getElementById('loginEmailBtn').style.display="inline-block";
+    document.getElementById('signupEmailBtn').style.display="inline-block";
+    pfpEl.style.display="none";
+    uploadPfp.style.display="none";
+  }
+});
+
+// ----- Load user data -----
+async function loadUserData(uid){
+  const docRef = doc(db,"users",uid);
+  const docSnap = await getDoc(docRef);
+  if(docSnap.exists()){
+    const data = docSnap.data();
+    state.level = data.level||1;
+    state.xp = data.xp||0;
+    state.stats = data.stats||state.stats;
+    state.scheduleDone = data.scheduleDone||{};
+    renderStats();
+    renderSchedule();
+    log("Loaded user data from server.");
+  }
+}
+
+// ----- Leaderboard (continued) -----
+async function loadLeaderboard(){
+  const q = query(collection(db,"users"), orderBy("level","desc"), limit(100));
+  const snapshot = await getDocs(q);
+  log("🏆 Top 100 Leaderboard:");
+  let rank = 1;
+  snapshot.forEach(doc => {
+    const u = doc.data();
+    const name = u.displayName || "Anonymous";
+    log(`${rank}. ${name} — Lv ${u.level}, XP ${u.xp}`);
+    rank++;
+  });
+}
+
+// ----- Init -----
+renderStats();
+renderExercises(muscleSelect.value);
+renderSchedule();
+log("Welcome — online Solo-Leveling HUD ready.");
+</script>
+
+</body>
+</html>
