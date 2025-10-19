@@ -1,207 +1,227 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Solo-Leveling Training System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solo Leveling IRL System</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#9aa4b2;--glass:rgba(255,255,255,0.03)}
-    *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
-    body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 20%,#1b2236 0%,#090d18 100%);color:#e6eef6;padding:28px}
-    header{display:flex;gap:18px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
-    h1{margin:0;font-size:22px}
-    .container{display:grid;grid-template-columns:360px 1fr;gap:18px}
-    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-    .stats{display:flex;flex-direction:column;gap:12px}
-    .stat-row{display:flex;justify-content:space-between;align-items:center}
-    .stat-name{font-weight:600}
-    .progress{height:12px;background:var(--glass);border-radius:8px;overflow:hidden;width:60%}
-    .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#06b6d4)}
-    .level-circle{width:72px;height:72px;border-radius:50%;background:linear-gradient(180deg,#151a2a,#0b1220);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.05);font-size:20px}
-    .btn{background:var(--accent);border:none;padding:8px 12px;border-radius:8px;color:white;font-weight:700;cursor:pointer}
-    .muted{color:var(--muted);font-size:13px}
-    .ex-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
-    .ex-item{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px}
-    .schedule{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .day{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;width:calc(33.333% - 6px)}
-    .tiny{font-size:12px;color:var(--muted)}
-    footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-    .log{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:200px;overflow:auto;margin-top:12px}
-    #leaderboard{background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;max-height:250px;overflow:auto;margin-top:12px}
-    #pfp{width:64px;height:64px;border-radius:50%;display:none;margin-right:10px}
-    @media(max-width:880px){.container{grid-template-columns:1fr}.day{width:48%}}
+    body {
+      background: linear-gradient(to bottom, #111, #000, #222);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      color: #8ab4f8;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .xp-bar {
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 20px;
+      margin-top: 8px;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      transition: width 0.4s;
+    }
+    .btn {
+      background: #222;
+      border: 1px solid #555;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #444; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .card {
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .activity-log {
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="level-box card" style="display:flex;align-items:center;gap:12px;">
-      <div class="level-circle" id="levelVal">1</div>
-      <div>
-        <h1>Shadow Gym — Leveling Board</h1>
-        <div class="tiny muted">Train, level up, and sync your progress like a shadow hunter.</div>
-      </div>
-    </div>
-    <div class="card" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-      <img id="pfp" alt="Profile">
-      <input type="file" id="uploadPfp" style="display:none">
-      <button id="loginGoogleBtn" class="btn">Login with Google</button>
-      <button id="logoutBtn" class="btn" style="display:none;">Logout</button>
-      <button id="syncBtn" class="btn">Sync to Server</button>
-    </div>
-  </header>
-
   <div class="container">
-    <aside class="card">
-  <div id="statsContainer" class="stats"></div>
-  <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 12px 0;">
-  <h3 style="margin: 0 0 8px 0; color: #a78bfa;">🏆 Top 100 Hunters</h3>
-  <div id="leaderboard" style="max-height: 250px; overflow-y: auto; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 8px;">
-    <div class="tiny muted">Loading leaderboard...</div>
-  </div>
-    </aside>
+    <h1>Solo Leveling IRL Player System</h1>
 
-
-    <main>
-      <div class="card">
-        <h2>Exercises & Quick Train</h2>
-        <div class="tiny muted">Select a muscle, intensity, and train to gain XP.</div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <select id="muscleSelect"></select>
-          <select id="intensity">
-            <option value="1">Light (x0.8)</option>
-            <option value="1.2" selected>Normal (x1.2)</option>
-            <option value="1.6">Hard (x1.6)</option>
-            <option value="2">Max (x2)</option>
-          </select>
-          <button class="btn" id="trainBtn">Quick Train</button>
-        </div>
-        <div class="ex-list" id="exerciseList"></div>
-        <div class="schedule" id="schedule"></div>
-        <div class="log" id="log"></div>
-        <footer>Made for training & habit building — inspired by Solo Leveling vibes.</footer>
+    <div class="stats">
+      <div>
+        <div>Level: <span id="level">1</span></div>
+        <div>XP: <span id="xp">0</span> / <span id="xpToNext">100</span></div>
+        <div class="xp-bar"><div id="xpFill" class="xp-fill" style="width: 0%"></div></div>
+        <div>Hunter Rank: <span id="rank">E</span></div>
       </div>
-    </main>
+      <button class="btn" onclick="resetAll()">Reset All</button>
+    </div>
+
+    <h3>Monster Kills</h3>
+    <div>
+      <button class="btn" onclick="killMonster('E')">Kill E (100 XP)</button>
+      <button class="btn" onclick="killMonster('D')">Kill D (300 XP)</button>
+      <button class="btn" onclick="killMonster('C')">Kill C (800 XP)</button>
+      <button class="btn" onclick="killMonster('B')">Kill B (1500 XP)</button>
+      <button class="btn" onclick="killMonster('A')">Kill A (3000 XP)</button>
+      <button class="btn" onclick="killMonster('S')">Kill S (5000 XP)</button>
+    </div>
+
+    <h3>Daily Exercise</h3>
+    <div class="grid">
+      <div class="card">
+        <div>Pushups: <span id="pushups">0</span>/100</div>
+        <button class="btn" onclick="addPushups(5)">+5</button>
+        <button class="btn" onclick="addPushups(10)">+10</button>
+      </div>
+      <div class="card">
+        <div>Squats: <span id="squats">0</span>/100</div>
+        <button class="btn" onclick="addSquats(5)">+5</button>
+        <button class="btn" onclick="addSquats(10)">+10</button>
+      </div>
+      <div class="card">
+        <div>Situps: <span id="situps">0</span>/100</div>
+        <button class="btn" onclick="addSitups(5)">+5</button>
+        <button class="btn" onclick="addSitups(10)">+10</button>
+      </div>
+      <div class="card">
+        <div>Run: <span id="run">0</span>/10 km</div>
+        <button class="btn" onclick="addRun(0.5)">+0.5 km</button>
+        <button class="btn" onclick="addRun(1)">+1 km</button>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn" onclick="completeDaily()">Complete Daily</button>
+      <div>Completions today: <span id="completions">0</span></div>
+    </div>
+
+    <div class="activity-log" id="log"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, getDocs, serverTimestamp, collection, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
-   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
-  authDomain: "shadowgymsystem.firebaseapp.com",
-  projectId: "shadowgymsystem",
-  storageBucket: "shadowgymsystem.firebasestorage.app",
-  messagingSenderId: "396589716297",
-  appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
-  measurementId: "G-K0BMF5SG2K"
-};
-
-
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
-
-    const EXERCISES = {
-      core: [{name:'Plank 60s',xp:12},{name:'Hanging Leg Raise 12',xp:18},{name:'Russian Twists 40',xp:10},{name:'Ab Wheel 10',xp:20}],
-      chest:[{name:'Push-ups 20',xp:10},{name:'Bench Press 8-12',xp:20},{name:'Incline Dumbbell Press 10',xp:18},{name:'Chest Fly 12',xp:14}],
-      shoulders:[{name:'Overhead Press 10',xp:20},{name:'Lateral Raise 12',xp:12},{name:'Front Raise 12',xp:10},{name:'Arnold Press 10',xp:18}],
-      biceps:[{name:'Barbell Curl 8-12',xp:18},{name:'Hammer Curl 10',xp:14},{name:'Concentration Curl 10',xp:12},{name:'Chin-ups 8',xp:24}],
-      triceps:[{name:'Close-Grip Bench 8',xp:22},{name:'Tricep Dips 12',xp:16},{name:'Rope Pushdown 15',xp:12},{name:'Overhead Extension 12',xp:14}],
-      forearm:[{name:'Wrist Curls 3x15',xp:10},{name:'Reverse Wrist Curls 3x15',xp:10},{name:'Farmer Walk 60s',xp:18},{name:'Towel Hangs 60s',xp:12}],
-      legs:[{name:'Squats 12',xp:20},{name:'Lunges 12 each',xp:16},{name:'Deadlifts 8',xp:24},{name:'Leg Press 12',xp:18}]
+  <script>
+    let state = {
+      level: 1, xp: 0,
+      pushups: 0, squats: 0, situps: 0, run: 0,
+      completions: 0,
+      lastDate: new Date().toDateString()
     };
-    const MUSCLES = Object.keys(EXERCISES);
-    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const xpToNext = l => 100*l;
 
-    let state = {level:1,xp:0,stats:Object.fromEntries(MUSCLES.map(m=>[m,0])),scheduleDone:{}};
-    const statsContainer=document.getElementById('statsContainer');
-    const logEl=document.getElementById('log');
-    const leaderboardEl=document.getElementById('leaderboard');
+    const MONSTER_XP = {E:100,D:300,C:800,B:1500,A:3000,S:5000};
+    const DAILY_TARGET = {pushups:100,squats:100,situps:100,run:10};
 
-
-    function saveState(){localStorage.setItem('shadowState',JSON.stringify(state));}
-    function log(msg){logEl.innerHTML=`<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`+logEl.innerHTML;}
-    function renderStats(){
-      statsContainer.innerHTML='';
-      MUSCLES.forEach(m=>{
-        const pct=Math.min(100,state.stats[m]);
-        statsContainer.insertAdjacentHTML('beforeend',`
-          <div class='stat-row'><div>${m}<span class='tiny muted'> Lv ${1+Math.floor(state.stats[m]/100)}</span></div>
-          <div class='progress'><i style='width:${pct}%'></i></div></div>`);
-      });
-      document.getElementById('levelVal').textContent=state.level;
+    function xpToNextLevel(lvl){ return Math.floor(100 + lvl*30 + Math.pow(lvl,2)*2.5); }
+    function getRank(lvl){
+      if(lvl<=10)return'E';if(lvl<=25)return'D';if(lvl<=45)return'C';if(lvl<=70)return'B';if(lvl<=90)return'A';return'S';
     }
 
-    async function awardXP(x,m){
-      state.xp+=x;state.stats[m]+=Math.round(x);
-      while(state.xp>=xpToNext(state.level)){state.xp-=xpToNext(state.level);state.level++;log(`✨ Level Up → ${state.level}`);}
-      saveState();renderStats();log(`+${x} XP to ${m}`);
-      const user=auth.currentUser;
-      if(user){
-        await setDoc(doc(db,'users',user.uid),{
-          displayName:user.displayName||user.email,
-          level:state.level,xp:state.xp,stats:state.stats,scheduleDone:state.scheduleDone,
-          updated:serverTimestamp()
-        },{merge:true});
-        await loadLeaderboard();
-        console.log('⚡ Synced instantly after XP gain');
+    function save(){ localStorage.setItem('soloLevelingIRL', JSON.stringify(state)); }
+    function load(){ const data = localStorage.getItem('soloLevelingIRL'); if(data){ try { state = JSON.parse(data); } catch(e){} } }
+
+    function checkDailyReset(){
+      const today = new Date().toDateString();
+      if(state.lastDate !== today){
+        state.pushups = 0; state.squats = 0; state.situps = 0; state.run = 0; state.completions = 0;
+        state.lastDate = today;
+        log('New day! Daily goals reset.');
       }
     }
 
-    const muscleSelect=document.getElementById('muscleSelect');
-    MUSCLES.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;muscleSelect.appendChild(o);});
-    function renderExercises(m){const list=document.getElementById('exerciseList');list.innerHTML='';
-      EXERCISES[m].forEach(ex=>{const d=document.createElement('div');d.className='ex-item';d.innerHTML=`<strong>${ex.name}</strong><div class='tiny muted'>XP:${ex.xp}</div><button class='btn small' data-muscle='${m}' data-xp='${ex.xp}'>Do</button>`;list.appendChild(d);});
-      list.querySelectorAll('button').forEach(b=>b.onclick=()=>awardXP(+b.dataset.xp,b.dataset.muscle));}
-    muscleSelect.onchange=e=>renderExercises(e.target.value);renderExercises(muscleSelect.value);
-
-    const scheduleEl=document.getElementById('schedule');
-    function renderSchedule(){scheduleEl.innerHTML='';
-      DAYS.forEach((day,i)=>{
-        const div=document.createElement('div');div.className='day';div.innerHTML=`<strong>${day}</strong>`;
-        const dayMuscles=[];while(dayMuscles.length<4){dayMuscles.push(MUSCLES[(i+dayMuscles.length)%MUSCLES.length]);}
-        dayMuscles.forEach(muscle=>{const ex=EXERCISES[muscle][0];const id=`${day}-${muscle}`;
-          const setsDone=state.scheduleDone[day]?.[id]||0;const totalSets=4;
-          div.insertAdjacentHTML('beforeend',`<label><span>${ex.name} (${setsDone}/${totalSets})</span><input type='range' min='0' max='${totalSets}' value='${setsDone}' data-day='${day}' data-muscle='${muscle}' data-xp='${ex.xp}' id='${id}'></label>`);
-        });scheduleEl.appendChild(div);});
-      scheduleEl.querySelectorAll('input[type="range"]').forEach(slider=>slider.oninput=()=>{
-        const {day,muscle,xp,id}=slider.dataset;const setsDone=+slider.value;state.scheduleDone[day]=state.scheduleDone[day]||{};const prev=state.scheduleDone[day][id]||0;state.scheduleDone[day][id]=setsDone;const gain=(setsDone-prev)*(+xp);if(gain>0)awardXP(gain,muscle);});
+    function updateUI(){
+      document.getElementById('level').innerText = state.level;
+      document.getElementById('xp').innerText = state.xp;
+      document.getElementById('xpToNext').innerText = state.level>=100?'MAX':xpToNextLevel(state.level);
+      document.getElementById('rank').innerText = getRank(state.level);
+      document.getElementById('pushups').innerText = state.pushups;
+      document.getElementById('squats').innerText = state.squats;
+      document.getElementById('situps').innerText = state.situps;
+      document.getElementById('run').innerText = state.run;
+      document.getElementById('completions').innerText = state.completions;
+      const pct = Math.min(100,(state.xp / xpToNextLevel(state.level))*100);
+      document.getElementById('xpFill').style.width = (state.level>=100?'100':pct)+'%';
+      save();
     }
-    renderSchedule();
 
-    document.getElementById('trainBtn').onclick=()=>{const m=muscleSelect.value;const i=+document.getElementById('intensity').value;const ex=EXERCISES[m][Math.floor(Math.random()*EXERCISES[m].length)];const g=Math.round(ex.xp*i);awardXP(g,m);log(`Trained ${m}: ${ex.name} (+${g}XP)`);};
+    function log(msg){
+      const div = document.getElementById('log');
+      const p = document.createElement('div');
+      p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      div.prepend(p);
+    }
 
-    // Leaderboard
-    async function loadLeaderboard(){const q=query(collection(db,'users'),orderBy('level','desc'),orderBy('xp','desc'),limit(100));
-      const snap=await getDocs(q);leaderboardEl.innerHTML='';let rank=1;
-      snap.forEach(docSnap=>{const u=docSnap.data();leaderboardEl.insertAdjacentHTML('beforeend',`<div><strong>#${rank} ${u.displayName||'User'}</strong> — Lv ${u.level||1} | ${u.xp||0} XP</div>`);rank++;});}
+    function gainXp(amount,reason){
+      if(state.level>=100)return;
+      state.xp+=amount;
+      log(`+${amount} XP (${reason})`);
+      while(state.xp >= xpToNextLevel(state.level) && state.level<100){
+        state.xp -= xpToNextLevel(state.level);
+        state.level++;
+        log(`Level Up! Now level ${state.level}`);
+      }
+      updateUI();
+    }
 
-    // Auth
-    const loginGoogleBtn=document.getElementById('loginGoogleBtn');const logoutBtn=document.getElementById('logoutBtn');const pfp=document.getElementById('pfp');const uploadPfp=document.getElementById('uploadPfp');
-    loginGoogleBtn.onclick=async()=>{try{await signInWithPopup(auth,provider);}catch(e){alert(e.message);}};
-    logoutBtn.onclick=()=>signOut(auth);
-    uploadPfp.onchange=async e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{const user=auth.currentUser;if(user){await updateProfile(user,{photoURL:reader.result});pfp.src=reader.result;pfp.style.display='block';log('Profile picture updated');}};reader.readAsDataURL(file);};
+    function killMonster(rank){ gainXp(MONSTER_XP[rank],`Killed ${rank}-rank monster`); }
+    function addPushups(n){ state.pushups+=n; checkDaily(); updateUI(); }
+    function addSquats(n){ state.squats+=n; checkDaily(); updateUI(); }
+    function addSitups(n){ state.situps+=n; checkDaily(); updateUI(); }
+    function addRun(n){ state.run+=n; checkDaily(); updateUI(); }
 
-    onAuthStateChanged(auth,async user=>{
-      if(user){loginGoogleBtn.style.display='none';logoutBtn.style.display='block';if(user.photoURL){pfp.src=user.photoURL;pfp.style.display='block';}
-        const userRef=doc(db,'users',user.uid);const snap=await getDoc(userRef);
-        if(snap.exists()){const d=snap.data();state.level=d.level||1;state.xp=d.xp||0;state.stats=d.stats||state.stats;state.scheduleDone=d.scheduleDone||{};renderStats();renderSchedule();log(`📦 Loaded saved data for ${user.displayName||'User'}`);}else{renderStats();renderSchedule();log('New user');}
-        await loadLeaderboard();
-      }else{loginGoogleBtn.style.display='block';logoutBtn.style.display='none';pfp.style.display='none';}
-    });
+    function checkDaily(){
+      if(state.pushups>=100 && state.squats>=100 && state.situps>=100 && state.run>=10){
+        if(state.completions==0){gainXp(100,'Daily goal');}
+        else{gainXp(50,'Extra daily');}
+        state.completions++;
+        log(`Daily completed (${state.completions})`);
+      }
+    }
 
-    document.getElementById('syncBtn').onclick=async()=>{const u=auth.currentUser;if(!u)return alert('Login first');await setDoc(doc(db,'users',u.uid),{displayName:u.displayName,level:state.level,xp:state.xp,stats:state.stats,scheduleDone:state.scheduleDone,updated:serverTimestamp()},{merge:true});log('✅ Synced to server');await loadLeaderboard();};
+    function completeDaily(){
+      if(state.completions==0)gainXp(100,'Manual daily');
+      else gainXp(50,'Manual repeat');
+      state.completions++;
+      log(`Manual daily completion (${state.completions})`);
+      updateUI();
+    }
 
-    // Auto-sync every 5 mins
-    setInterval(async()=>{const u=auth.currentUser;if(!u)return;await setDoc(doc(db,'users',u.uid),{displayName:u.displayName,level:state.level,xp:state.xp,stats:state.stats,scheduleDone:state.scheduleDone,updated:serverTimestamp()},{merge:true});console.log('🕒 Auto-synced');},5*60*1000);
-  setInterval(loadLeaderboard, 60 * 1000);
+    function resetAll(){
+      if(!confirm('Reset all progress?')) return;
+      state = { level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastDate:new Date().toDateString() };
+      document.getElementById('log').innerHTML='';
+      save();
+      updateUI();
+    }
 
+    load();
+    checkDailyReset();
+    updateUI();
   </script>
 </body>
 </html>
