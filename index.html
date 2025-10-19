@@ -127,10 +127,14 @@
       <button class="btn" onclick="addRun(1)">+1 km</button>
     </div>
   </div>
+
   <div style="text-align:center; margin-bottom:10px;">
     <button class="btn" onclick="completeDaily()">Complete Daily</button>
     <div>Completions today: <span id="completions">0</span></div>
+    <br>
+    <button class="btn" onclick="resetAll()">RESET ALL</button>
   </div>
+
   <div class="activity-log" id="log"></div>
 </div>
 <script>
@@ -171,7 +175,7 @@ function addSitups(n){ state.situps+=n; checkDaily(); updateUI(); }
 function addRun(n){ state.run+=n; checkDaily(); updateUI(); }
 function checkDaily(){ if(state.pushups>=100 && state.squats>=100 && state.situps>=100 && state.run>=10){ if(state.completions==0){ gainXp(100,'Daily goal'); } else { gainXp(50,'Extra daily'); } state.completions++; log(`[SYSTEM]: Daily completed (${state.completions})`); } }
 function completeDaily(){ if(state.completions==0)gainXp(100,'Manual daily'); else gainXp(50,'Manual repeat'); state.completions++; log(`[SYSTEM]: Manual daily completion (${state.completions})`); updateUI(); }
-function resetAll(){ if(!confirm('Reset all progress?')) return; state={level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastDate:new Date().toDateString()}; document.getElementById('log').innerHTML=''; save(); updateUI(); }
+function resetAll(){ if(!confirm('Reset all progress?')) return; state={level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastDate:new Date().toDateString()}; document.getElementById('log').innerHTML=''; log('[SYSTEM]: All progress reset.'); save(); updateUI(); }
 
 load(); checkDailyReset(); updateUI();
 </script>
