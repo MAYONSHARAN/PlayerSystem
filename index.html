@@ -3,145 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Leveling IRL - Arise UI with Firebase</title>
+<title>Solo Leveling IRL System</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
-  body { margin:0; padding:0; background: linear-gradient(180deg, #0b0b0b, #111); color: #00f0ff; font-family: 'Orbitron', sans-serif; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding-top:30px; }
-  .container { background: rgba(0,0,0,0.85); border: 2px solid #00f0ff; border-radius: 15px; padding: 20px; max-width: 600px; width:90%; box-shadow:0 0 20px #00f0ff; }
-  h1 { text-align:center; font-size:28px; color:#00ffff; text-shadow:0 0 10px #00f0ff; margin-bottom:20px; }
-  .stats { margin-bottom:20px; text-align:center; }
-  .xp-bar { background:#111; border-radius:8px; overflow:hidden; height:20px; margin:10px 0; border:1px solid #00f0ff; }
-  .xp-fill { height:100%; background: linear-gradient(90deg, #00f0ff, #00ffff); transition: width 0.5s ease; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:15px; margin-bottom:20px; }
-  .card { background: rgba(0,0,0,0.7); border:1px solid #00f0ff; border-radius:10px; padding:15px; text-align:center; box-shadow:0 0 10px #00f0ff; transition: transform 0.2s; }
-  .card:hover { transform: scale(1.05); }
-  .btn { background:#000; border:1px solid #00f0ff; color:#00ffff; padding:8px 12px; border-radius:6px; cursor:pointer; margin-top:5px; transition:0.3s; }
+  body { background: radial-gradient(circle, #02040a, #000); color:#00f0ff; font-family:'Orbitron',sans-serif; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding-top:40px; }
+  .container { background: rgba(0,0,0,0.8); border:2px solid #00f0ff; border-radius:15px; padding:25px; width:90%; max-width:600px; box-shadow:0 0 25px #00f0ff; }
+  h1 { text-align:center; color:#00ffff; text-shadow:0 0 12px #00f0ff; margin-bottom:20px; }
+  .stats { text-align:center; margin-bottom:20px; }
+  .xp-bar { background:#111; border:1px solid #00f0ff; border-radius:10px; height:20px; overflow:hidden; }
+  .xp-fill { height:100%; background:linear-gradient(90deg,#00f0ff,#00ffff); width:0%; transition:width 0.6s; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:20px; }
+  .card { background:rgba(0,0,0,0.7); border:1px solid #00f0ff; border-radius:10px; padding:15px; text-align:center; box-shadow:0 0 10px #00f0ff; }
+  .btn { background:#000; color:#00ffff; border:1px solid #00f0ff; border-radius:6px; padding:8px 12px; cursor:pointer; margin-top:8px; transition:0.3s; }
   .btn:hover { background:#00f0ff; color:#000; }
-  .activity-log { max-height:200px; overflow-y:auto; background: rgba(0,0,0,0.6); border:1px solid #00f0ff; border-radius:8px; padding:10px; font-size:12px; box-shadow:0 0 10px #00f0ff; }
+  .activity-log { max-height:200px; overflow-y:auto; background:rgba(0,0,0,0.5); border:1px solid #00f0ff; border-radius:10px; padding:10px; font-size:13px; }
   .system-message { color:#00ffff; text-shadow:0 0 8px #00f0ff; }
 </style>
-<!-- Firebase SDK -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
-    authDomain: "shadowgymsystem.firebaseapp.com",
-    projectId: "shadowgymsystem",
-    storageBucket: "shadowgymsystem.firebasestorage.app",
-    messagingSenderId: "396589716297",
-    appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
-    measurementId: "G-K0BMF5SG2K"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
+  authDomain: "shadowgymsystem.firebaseapp.com",
+  projectId: "shadowgymsystem",
+  storageBucket: "shadowgymsystem.firebasestorage.app",
+  messagingSenderId: "396589716297",
+  appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
+  measurementId: "G-K0BMF5SG2K"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const stateRef = doc(db, "playerStats", "mainPlayer");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = doc(db, "playerStats", "mainPlayer");
 
-  // Real-time updates
-  onSnapshot(stateRef, (docSnap) => {
-    if(docSnap.exists()){
-      const data = docSnap.data();
-      document.getElementById('level').innerText = data.level;
-      document.getElementById('xp').innerText = data.xp;
-      document.getElementById('pushups').innerText = data.pushups;
-      document.getElementById('squats').innerText = data.squats;
-      document.getElementById('situps').innerText = data.situps;
-      document.getElementById('run').innerText = data.run;
-      document.getElementById('completions').innerText = data.completions;
-      const xpToNext = 100 + data.level*30 + Math.pow(data.level,2)*2.5;
-      const pct = Math.min(100,(data.xp/xpToNext)*100);
-      document.getElementById('xpFill').style.width = pct+'%';
-    }
-  });
+onSnapshot(ref, snap => {
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const rank = getRank(data.level);
+  const xpToNext = Math.floor(100 * Math.pow(1.15, data.level - 1));
+  const pct = Math.min(100, (data.xp / xpToNext) * 100);
+  document.getElementById("level").textContent = data.level;
+  document.getElementById("rank").textContent = rank;
+  document.getElementById("xp").textContent = `${data.xp}/${xpToNext}`;
+  document.getElementById("xpFill").style.width = pct + "%";
+  document.getElementById("pushups").textContent = data.pushups;
+  document.getElementById("squats").textContent = data.squats;
+  document.getElementById("situps").textContent = data.situps;
+  document.getElementById("run").textContent = data.run;
+  document.getElementById("completions").textContent = data.completions || 0;
+});
 
-  async function gainXp(amount, reason){
-    const docSnap = await getDoc(stateRef);
-    if(docSnap.exists()){
-      let data = docSnap.data();
-      let newXp = data.xp + amount;
-      let level = data.level;
-      while(newXp >= (100 + level*30 + Math.pow(level,2)*2.5)){
-        newXp -= (100 + level*30 + Math.pow(level,2)*2.5);
-        level++;
-      }
-      await updateDoc(stateRef, { xp:newXp, level:level });
-      log(`[SYSTEM]: +${amount} XP (${reason})`);
-    }
+function getRank(level) {
+  if (level < 10) return "E";
+  if (level < 25) return "D";
+  if (level < 50) return "C";
+  if (level < 75) return "B";
+  if (level < 90) return "A";
+  return "S";
+}
+
+async function gainXp(amount, reason) {
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  let d = snap.data();
+  let xp = d.xp + amount;
+  let lvl = d.level;
+  let next = Math.floor(100 * Math.pow(1.15, lvl - 1));
+  while (xp >= next && lvl < 100) {
+    xp -= next;
+    lvl++;
+    next = Math.floor(100 * Math.pow(1.15, lvl - 1));
+    log(`LEVEL UP → ${lvl}`);
   }
+  await updateDoc(ref, { xp, level: lvl });
+  log(`+${amount} XP (${reason})`);
+}
 
-  async function addExercise(field, n){
-    await updateDoc(stateRef, { [field]: increment(n) });
-    checkDaily();
+async function addExercise(type, val) {
+  await updateDoc(ref, { [type]: increment(val) });
+  checkGoal();
+}
+
+async function checkGoal() {
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const d = snap.data();
+  if (d.pushups >= 100 && d.squats >= 100 && d.situps >= 100 && d.run >= 10) {
+    const bonus = d.completions ? 100 : 250;
+    await gainXp(bonus, "Daily goal");
+    await updateDoc(ref, { completions: increment(1) });
+    log(`Daily goal completed (+${bonus} XP)`);
   }
+}
 
-  async function checkDaily(){
-    const docSnap = await getDoc(stateRef);
-    if(docSnap.exists()){
-      const data = docSnap.data();
-      if(data.pushups>=100 && data.squats>=100 && data.situps>=100 && data.run>=10){
-        if(!data.completions || data.completions==0){ await gainXp(100,'Daily goal'); }
-        else{ await gainXp(50,'Extra daily'); }
-        await updateDoc(stateRef, { completions: increment(1) });
-        log(`[SYSTEM]: Daily completed (${data.completions + 1})`);
-      }
-    }
-  }
+async function resetAll() {
+  if (!confirm("Reset all progress?")) return;
+  await setDoc(ref, { level: 1, xp: 0, pushups: 0, squats: 0, situps: 0, run: 0, completions: 0 });
+  log("System reset complete.");
+}
 
-  async function completeDaily(){ await gainXp(100,'Manual daily'); await updateDoc(stateRef, { completions: increment(1) }); log('[SYSTEM]: Manual daily completion'); }
+function log(msg) {
+  const logDiv = document.getElementById("log");
+  const p = document.createElement("div");
+  p.className = "system-message";
+  p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  logDiv.prepend(p);
+}
 
-  async function resetAll(){ if(!confirm('Reset all progress?')) return; await setDoc(stateRef, { level:1, xp:0, pushups:0, squats:0, situps:0, run:0, completions:0 }); log('[SYSTEM]: All progress reset.'); }
-
-  function log(msg){ const div = document.getElementById('log'); const p = document.createElement('div'); p.className='system-message'; p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`; div.prepend(p); }
-
-// Expose functions to global scope so HTML buttons can call them
+// expose functions to HTML
 window.addExercise = addExercise;
-window.completeDaily = completeDaily;
 window.resetAll = resetAll;
-
 </script>
 </head>
 <body>
 <div class="container">
-<h1>SYSTEM STATUS</h1>
+<h1>SOLO LEVELING SYSTEM</h1>
 <div class="stats">
-  <div>Level: <span id="level">1</span></div>
+  <div>Level: <span id="level">1</span> | Rank: <span id="rank">E</span></div>
   <div>XP: <span id="xp">0</span></div>
   <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
-  <div>Hunter Rank: <span id="rank">E</span></div>
 </div>
-<h3>Daily Exercise</h3>
+
+<h3>Daily Exercises</h3>
 <div class="grid">
-  <div class="card">
-    <div>Pushups: <span id="pushups">0</span>/100</div>
-    <button class="btn" onclick="addExercise('pushups',5)">+5</button>
-    <button class="btn" onclick="addExercise('pushups',10)">+10</button>
-  </div>
-  <div class="card">
-    <div>Squats: <span id="squats">0</span>/100</div>
-    <button class="btn" onclick="addExercise('squats',5)">+5</button>
-    <button class="btn" onclick="addExercise('squats',10)">+10</button>
-  </div>
-  <div class="card">
-    <div>Situps: <span id="situps">0</span>/100</div>
-    <button class="btn" onclick="addExercise('situps',5)">+5</button>
-    <button class="btn" onclick="addExercise('situps',10)">+10</button>
-  </div>
-  <div class="card">
-    <div>Run: <span id="run">0</span>/10 km</div>
-    <button class="btn" onclick="addExercise('run',0.5)">+0.5 km</button>
-    <button class="btn" onclick="addExercise('run',1)">+1 km</button>
-  </div>
+  <div class="card"><div>Pushups: <span id="pushups">0</span>/100</div><button class="btn" onclick="addExercise('pushups',5)">+5</button><button class="btn" onclick="addExercise('pushups',10)">+10</button></div>
+  <div class="card"><div>Squats: <span id="squats">0</span>/100</div><button class="btn" onclick="addExercise('squats',5)">+5</button><button class="btn" onclick="addExercise('squats',10)">+10</button></div>
+  <div class="card"><div>Situps: <span id="situps">0</span>/100</div><button class="btn" onclick="addExercise('situps',5)">+5</button><button class="btn" onclick="addExercise('situps',10)">+10</button></div>
+  <div class="card"><div>Run: <span id="run">0</span>/10 km</div><button class="btn" onclick="addExercise('run',0.5)">+0.5 km</button><button class="btn" onclick="addExercise('run',1)">+1 km</button></div>
 </div>
-<div style="text-align:center; margin-bottom:10px;">
-  <button class="btn" onclick="completeDaily()">Complete Daily</button>
-  <div>Completions today: <span id="completions">0</span></div>
-  <br>
+
+<div style="text-align:center;">
+  <div>Daily completions: <span id="completions">0</span></div>
   <button class="btn" onclick="resetAll()">RESET ALL</button>
 </div>
+
 <div class="activity-log" id="log"></div>
 </div>
 </body>
 </html>
-
