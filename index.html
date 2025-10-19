@@ -25,22 +25,21 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
-  authDomain: "shadowgymsystem.firebaseapp.com",
-  projectId: "shadowgymsystem",
-  storageBucket: "shadowgymsystem.firebasestorage.app",
-  messagingSenderId: "396589716297",
-  appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
-  measurementId: "G-K0BMF5SG2K"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
+    authDomain: "shadowgymsystem.firebaseapp.com",
+    projectId: "shadowgymsystem",
+    storageBucket: "shadowgymsystem.firebasestorage.app",
+    messagingSenderId: "396589716297",
+    appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
+    measurementId: "G-K0BMF5SG2K"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const stateRef = doc(db, "playerStats", "mainPlayer");
 
-  // Listen for realtime updates
+  // Real-time updates
   onSnapshot(stateRef, (docSnap) => {
     if(docSnap.exists()){
       const data = docSnap.data();
@@ -63,9 +62,8 @@ const firebaseConfig = {
       let data = docSnap.data();
       let newXp = data.xp + amount;
       let level = data.level;
-      const xpToNext = 100 + level*30 + Math.pow(level,2)*2.5;
-      while(newXp >= xpToNext){
-        newXp -= xpToNext;
+      while(newXp >= (100 + level*30 + Math.pow(level,2)*2.5)){
+        newXp -= (100 + level*30 + Math.pow(level,2)*2.5);
         level++;
       }
       await updateDoc(stateRef, { xp:newXp, level:level });
@@ -92,6 +90,7 @@ const firebaseConfig = {
   }
 
   async function completeDaily(){ await gainXp(100,'Manual daily'); await updateDoc(stateRef, { completions: increment(1) }); log('[SYSTEM]: Manual daily completion'); }
+
   async function resetAll(){ if(!confirm('Reset all progress?')) return; await setDoc(stateRef, { level:1, xp:0, pushups:0, squats:0, situps:0, run:0, completions:0 }); log('[SYSTEM]: All progress reset.'); }
 
   function log(msg){ const div = document.getElementById('log'); const p = document.createElement('div'); p.className='system-message'; p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`; div.prepend(p); }
@@ -102,7 +101,7 @@ const firebaseConfig = {
 <h1>SYSTEM STATUS</h1>
 <div class="stats">
   <div>Level: <span id="level">1</span></div>
-  <div>XP: <span id="xp">0</span> / <span id="xpToNext">100</span></div>
+  <div>XP: <span id="xp">0</span></div>
   <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
   <div>Hunter Rank: <span id="rank">E</span></div>
 </div>
@@ -126,4 +125,16 @@ const firebaseConfig = {
   <div class="card">
     <div>Run: <span id="run">0</span>/10 km</div>
     <button class="btn" onclick="addExercise('run',0.5)">+0.5 km</button>
-    <
+    <button class="btn" onclick="addExercise('run',1)">+1 km</button>
+  </div>
+</div>
+<div style="text-align:center; margin-bottom:10px;">
+  <button class="btn" onclick="completeDaily()">Complete Daily</button>
+  <div>Completions today: <span id="completions">0</span></div>
+  <br>
+  <button class="btn" onclick="resetAll()">RESET ALL</button>
+</div>
+<div class="activity-log" id="log"></div>
+</div>
+</body>
+</html>
