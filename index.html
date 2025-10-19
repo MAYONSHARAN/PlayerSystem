@@ -1,227 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solo Leveling IRL System</title>
-  <style>
-    body {
-      background: linear-gradient(to bottom, #111, #000, #222);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 24px;
-      color: #8ab4f8;
-    }
-    .stats {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .xp-bar {
-      background: #333;
-      border-radius: 6px;
-      overflow: hidden;
-      height: 20px;
-      margin-top: 8px;
-    }
-    .xp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #a78bfa, #60a5fa);
-      transition: width 0.4s;
-    }
-    .btn {
-      background: #222;
-      border: 1px solid #555;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .btn:hover { background: #444; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-    .card {
-      background: rgba(20, 20, 20, 0.8);
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .activity-log {
-      max-height: 200px;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 8px;
-      margin-top: 10px;
-      font-size: 12px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo Leveling IRL - Arise UI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #0b0b0b, #111);
+    color: #00f0ff;
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 30px;
+  }
+  .container {
+    background: rgba(0,0,0,0.85);
+    border: 2px solid #00f0ff;
+    border-radius: 15px;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 20px #00f0ff;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00f0ff;
+    margin-bottom: 20px;
+  }
+  .stats {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .xp-bar {
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 20px;
+    margin: 10px 0;
+    border: 1px solid #00f0ff;
+  }
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f0ff, #00ffff);
+    transition: width 0.5s ease;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: rgba(0,0,0,0.7);
+    border: 1px solid #00f0ff;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 0 10px #00f0ff;
+    transition: transform 0.2s;
+  }
+  .card:hover { transform: scale(1.05); }
+  .btn {
+    background: #000;
+    border: 1px solid #00f0ff;
+    color: #00ffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: 0.3s;
+  }
+  .btn:hover { background: #00f0ff; color: #000; }
+  .activity-log {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #00f0ff;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    box-shadow: 0 0 10px #00f0ff;
+  }
+  .system-message {
+    color: #00ffff;
+    text-shadow: 0 0 8px #00f0ff;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Solo Leveling IRL Player System</h1>
-
-    <div class="stats">
-      <div>
-        <div>Level: <span id="level">1</span></div>
-        <div>XP: <span id="xp">0</span> / <span id="xpToNext">100</span></div>
-        <div class="xp-bar"><div id="xpFill" class="xp-fill" style="width: 0%"></div></div>
-        <div>Hunter Rank: <span id="rank">E</span></div>
-      </div>
-      <button class="btn" onclick="resetAll()">Reset All</button>
-    </div>
-
-    <h3>Monster Kills</h3>
-    <div>
-      <button class="btn" onclick="killMonster('E')">Kill E (100 XP)</button>
-      <button class="btn" onclick="killMonster('D')">Kill D (300 XP)</button>
-      <button class="btn" onclick="killMonster('C')">Kill C (800 XP)</button>
-      <button class="btn" onclick="killMonster('B')">Kill B (1500 XP)</button>
-      <button class="btn" onclick="killMonster('A')">Kill A (3000 XP)</button>
-      <button class="btn" onclick="killMonster('S')">Kill S (5000 XP)</button>
-    </div>
-
-    <h3>Daily Exercise</h3>
-    <div class="grid">
-      <div class="card">
-        <div>Pushups: <span id="pushups">0</span>/100</div>
-        <button class="btn" onclick="addPushups(5)">+5</button>
-        <button class="btn" onclick="addPushups(10)">+10</button>
-      </div>
-      <div class="card">
-        <div>Squats: <span id="squats">0</span>/100</div>
-        <button class="btn" onclick="addSquats(5)">+5</button>
-        <button class="btn" onclick="addSquats(10)">+10</button>
-      </div>
-      <div class="card">
-        <div>Situps: <span id="situps">0</span>/100</div>
-        <button class="btn" onclick="addSitups(5)">+5</button>
-        <button class="btn" onclick="addSitups(10)">+10</button>
-      </div>
-      <div class="card">
-        <div>Run: <span id="run">0</span>/10 km</div>
-        <button class="btn" onclick="addRun(0.5)">+0.5 km</button>
-        <button class="btn" onclick="addRun(1)">+1 km</button>
-      </div>
-    </div>
-    <div style="margin-top:10px">
-      <button class="btn" onclick="completeDaily()">Complete Daily</button>
-      <div>Completions today: <span id="completions">0</span></div>
-    </div>
-
-    <div class="activity-log" id="log"></div>
+<div class="container">
+  <h1>SYSTEM STATUS</h1>
+  <div class="stats">
+    <div>Level: <span id="level">1</span></div>
+    <div>XP: <span id="xp">0</span> / <span id="xpToNext">100</span></div>
+    <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+    <div>Hunter Rank: <span id="rank">E</span></div>
   </div>
 
-  <script>
-    let state = {
-      level: 1, xp: 0,
-      pushups: 0, squats: 0, situps: 0, run: 0,
-      completions: 0,
-      lastDate: new Date().toDateString()
-    };
+  <h3>Daily Exercise</h3>
+  <div class="grid">
+    <div class="card">
+      <div>Pushups: <span id="pushups">0</span>/100</div>
+      <button class="btn" onclick="addPushups(5)">+5</button>
+      <button class="btn" onclick="addPushups(10)">+10</button>
+    </div>
+    <div class="card">
+      <div>Squats: <span id="squats">0</span>/100</div>
+      <button class="btn" onclick="addSquats(5)">+5</button>
+      <button class="btn" onclick="addSquats(10)">+10</button>
+    </div>
+    <div class="card">
+      <div>Situps: <span id="situps">0</span>/100</div>
+      <button class="btn" onclick="addSitups(5)">+5</button>
+      <button class="btn" onclick="addSitups(10)">+10</button>
+    </div>
+    <div class="card">
+      <div>Run: <span id="run">0</span>/10 km</div>
+      <button class="btn" onclick="addRun(0.5)">+0.5 km</button>
+      <button class="btn" onclick="addRun(1)">+1 km</button>
+    </div>
+  </div>
+  <div style="text-align:center; margin-bottom:10px;">
+    <button class="btn" onclick="completeDaily()">Complete Daily</button>
+    <div>Completions today: <span id="completions">0</span></div>
+  </div>
+  <div class="activity-log" id="log"></div>
+</div>
+<script>
+let state = {
+  level:1, xp:0,
+  pushups:0, squats:0, situps:0, run:0,
+  completions:0,
+  lastDate: new Date().toDateString()
+};
 
-    const MONSTER_XP = {E:100,D:300,C:800,B:1500,A:3000,S:5000};
-    const DAILY_TARGET = {pushups:100,squats:100,situps:100,run:10};
+function xpToNextLevel(lvl){ return Math.floor(100 + lvl*30 + Math.pow(lvl,2)*2.5); }
+function getRank(lvl){ if(lvl<=10)return'E';if(lvl<=25)return'D';if(lvl<=45)return'C';if(lvl<=70)return'B';if(lvl<=90)return'A';return'S'; }
 
-    function xpToNextLevel(lvl){ return Math.floor(100 + lvl*30 + Math.pow(lvl,2)*2.5); }
-    function getRank(lvl){
-      if(lvl<=10)return'E';if(lvl<=25)return'D';if(lvl<=45)return'C';if(lvl<=70)return'B';if(lvl<=90)return'A';return'S';
-    }
+function save(){ localStorage.setItem('soloLevelingIRL', JSON.stringify(state)); }
+function load(){ const data=localStorage.getItem('soloLevelingIRL'); if(data){ try{state=JSON.parse(data);}catch(e){} } }
+function checkDailyReset(){ const today=new Date().toDateString(); if(state.lastDate!==today){ state.pushups=0; state.squats=0; state.situps=0; state.run=0; state.completions=0; state.lastDate=today; log('[SYSTEM]: New day! Daily goals reset.'); } }
+function updateUI(){
+  document.getElementById('level').innerText=state.level;
+  document.getElementById('xp').innerText=state.xp;
+  document.getElementById('xpToNext').innerText=state.level>=100?'MAX':xpToNextLevel(state.level);
+  document.getElementById('rank').innerText=getRank(state.level);
+  document.getElementById('pushups').innerText=state.pushups;
+  document.getElementById('squats').innerText=state.squats;
+  document.getElementById('situps').innerText=state.situps;
+  document.getElementById('run').innerText=state.run;
+  document.getElementById('completions').innerText=state.completions;
+  const pct=Math.min(100,(state.xp/xpToNextLevel(state.level))*100);
+  document.getElementById('xpFill').style.width=(state.level>=100?'100':pct)+'%';
+  save();
+}
+function log(msg){ const div=document.getElementById('log'); const p=document.createElement('div'); p.className='system-message'; p.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`; div.prepend(p); }
 
-    function save(){ localStorage.setItem('soloLevelingIRL', JSON.stringify(state)); }
-    function load(){ const data = localStorage.getItem('soloLevelingIRL'); if(data){ try { state = JSON.parse(data); } catch(e){} } }
+function gainXp(amount,reason){ if(state.level>=100)return; state.xp+=amount; log(`[SYSTEM]: +${amount} XP (${reason})`); while(state.xp>=xpToNextLevel(state.level)&&state.level<100){ state.xp-=xpToNextLevel(state.level); state.level++; log(`[SYSTEM]: Level Up! Now level ${state.level}`); } updateUI(); }
 
-    function checkDailyReset(){
-      const today = new Date().toDateString();
-      if(state.lastDate !== today){
-        state.pushups = 0; state.squats = 0; state.situps = 0; state.run = 0; state.completions = 0;
-        state.lastDate = today;
-        log('New day! Daily goals reset.');
-      }
-    }
+function addPushups(n){ state.pushups+=n; checkDaily(); updateUI(); }
+function addSquats(n){ state.squats+=n; checkDaily(); updateUI(); }
+function addSitups(n){ state.situps+=n; checkDaily(); updateUI(); }
+function addRun(n){ state.run+=n; checkDaily(); updateUI(); }
+function checkDaily(){ if(state.pushups>=100 && state.squats>=100 && state.situps>=100 && state.run>=10){ if(state.completions==0){ gainXp(100,'Daily goal'); } else { gainXp(50,'Extra daily'); } state.completions++; log(`[SYSTEM]: Daily completed (${state.completions})`); } }
+function completeDaily(){ if(state.completions==0)gainXp(100,'Manual daily'); else gainXp(50,'Manual repeat'); state.completions++; log(`[SYSTEM]: Manual daily completion (${state.completions})`); updateUI(); }
+function resetAll(){ if(!confirm('Reset all progress?')) return; state={level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastDate:new Date().toDateString()}; document.getElementById('log').innerHTML=''; save(); updateUI(); }
 
-    function updateUI(){
-      document.getElementById('level').innerText = state.level;
-      document.getElementById('xp').innerText = state.xp;
-      document.getElementById('xpToNext').innerText = state.level>=100?'MAX':xpToNextLevel(state.level);
-      document.getElementById('rank').innerText = getRank(state.level);
-      document.getElementById('pushups').innerText = state.pushups;
-      document.getElementById('squats').innerText = state.squats;
-      document.getElementById('situps').innerText = state.situps;
-      document.getElementById('run').innerText = state.run;
-      document.getElementById('completions').innerText = state.completions;
-      const pct = Math.min(100,(state.xp / xpToNextLevel(state.level))*100);
-      document.getElementById('xpFill').style.width = (state.level>=100?'100':pct)+'%';
-      save();
-    }
-
-    function log(msg){
-      const div = document.getElementById('log');
-      const p = document.createElement('div');
-      p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-      div.prepend(p);
-    }
-
-    function gainXp(amount,reason){
-      if(state.level>=100)return;
-      state.xp+=amount;
-      log(`+${amount} XP (${reason})`);
-      while(state.xp >= xpToNextLevel(state.level) && state.level<100){
-        state.xp -= xpToNextLevel(state.level);
-        state.level++;
-        log(`Level Up! Now level ${state.level}`);
-      }
-      updateUI();
-    }
-
-    function killMonster(rank){ gainXp(MONSTER_XP[rank],`Killed ${rank}-rank monster`); }
-    function addPushups(n){ state.pushups+=n; checkDaily(); updateUI(); }
-    function addSquats(n){ state.squats+=n; checkDaily(); updateUI(); }
-    function addSitups(n){ state.situps+=n; checkDaily(); updateUI(); }
-    function addRun(n){ state.run+=n; checkDaily(); updateUI(); }
-
-    function checkDaily(){
-      if(state.pushups>=100 && state.squats>=100 && state.situps>=100 && state.run>=10){
-        if(state.completions==0){gainXp(100,'Daily goal');}
-        else{gainXp(50,'Extra daily');}
-        state.completions++;
-        log(`Daily completed (${state.completions})`);
-      }
-    }
-
-    function completeDaily(){
-      if(state.completions==0)gainXp(100,'Manual daily');
-      else gainXp(50,'Manual repeat');
-      state.completions++;
-      log(`Manual daily completion (${state.completions})`);
-      updateUI();
-    }
-
-    function resetAll(){
-      if(!confirm('Reset all progress?')) return;
-      state = { level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastDate:new Date().toDateString() };
-      document.getElementById('log').innerHTML='';
-      save();
-      updateUI();
-    }
-
-    load();
-    checkDailyReset();
-    updateUI();
-  </script>
+load(); checkDailyReset(); updateUI();
+</script>
 </body>
 </html>
