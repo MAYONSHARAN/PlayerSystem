@@ -94,6 +94,12 @@
   async function resetAll(){ if(!confirm('Reset all progress?')) return; await setDoc(stateRef, { level:1, xp:0, pushups:0, squats:0, situps:0, run:0, completions:0 }); log('[SYSTEM]: All progress reset.'); }
 
   function log(msg){ const div = document.getElementById('log'); const p = document.createElement('div'); p.className='system-message'; p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`; div.prepend(p); }
+
+// Expose functions to global scope so HTML buttons can call them
+window.addExercise = addExercise;
+window.completeDaily = completeDaily;
+window.resetAll = resetAll;
+
 </script>
 </head>
 <body>
@@ -138,3 +144,4 @@
 </div>
 </body>
 </html>
+
