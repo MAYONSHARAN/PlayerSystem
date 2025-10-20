@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dark Genesis — Solo Leveling IRL</title>
+<title>Dark Genesis — Player System</title>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
@@ -11,285 +11,94 @@
     --neon:#00f0ff;
     --neon-2:#00ffff;
     --bg:#03060a;
-    --glass: rgba(255,255,255,0.04);
   }
-  *{box-sizing:border-box}
   body{
     margin:0;
     background: radial-gradient(circle at 20% 10%, #071022 0%, #000 35%);
     color:var(--neon);
-    font-family:'Orbitron',system-ui,Segoe UI,Roboto,Arial;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
+    font-family:'Orbitron',system-ui;
     display:flex;
     justify-content:center;
     padding:36px 12px;
   }
-
-  /* Main frame */
   .frame{
-    width:920px;
-    max-width:95%;
-    background: linear-gradient(180deg, rgba(0,0,0,0.78), rgba(4,6,10,0.86));
+    width:900px;max-width:95%;
+    background:rgba(0,0,0,0.6);
     border-radius:14px;
     padding:22px;
-    border: 1px solid rgba(0,240,255,0.08);
-    box-shadow: 0 20px 60px rgba(0,16,30,0.7), 0 0 32px rgba(0,240,255,0.03);
-    overflow:hidden;
-  }
-
-  /* Activation overlay (click to allow sound & start intro) */
-  .activate-overlay{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.85));
-    z-index:999;
-  }
-  .activate-card{
-    background:rgba(0,0,0,0.75);
     border:1px solid rgba(0,240,255,0.08);
-    padding:20px 28px;
-    border-radius:12px;
-    text-align:center;
-    box-shadow:0 12px 40px rgba(0,0,0,0.6);
+    box-shadow:0 20px 60px rgba(0,16,30,0.7);
   }
-  .activate-btn{
-    margin-top:14px;
-    background:transparent;
-    color:var(--neon-2);
-    padding:10px 16px;
-    border-radius:8px;
-    border:1px solid rgba(0,240,255,0.18);
-    cursor:pointer;
-    font-weight:700;
-  }
-  .activate-sub { font-size:13px; color:rgba(255,255,255,0.6); margin-top:8px; }
 
-  /* Header: logo + name */
   .header{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    margin-bottom:14px;
-    opacity:0;
-    transform:translateY(-6px);
-    animation:headerIn .8s ease-out forwards .15s;
+    display:flex;align-items:center;gap:16px;margin-bottom:14px;
+    opacity:0;animation:fadeIn .8s ease-out forwards .15s;
   }
-  @keyframes headerIn{ to{ opacity:1; transform:none } }
-
-  .logo-wrap{
-    width:88px;
-    height:88px;
-    position:relative;
-    border-radius:999px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    backdrop-filter: blur(4px);
+  @keyframes fadeIn{to{opacity:1;}}
+  .logo-wrap{position:relative;width:88px;height:88px;}
+  .mana-ring{position:absolute;inset:0;border-radius:50%;overflow:hidden;}
+  .mana-ring::before{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(0,240,255,0.1), rgba(0,240,255,0.3));
+    animation:spin 6s linear infinite;
   }
-  /* mana ring + glow */
-  .mana-ring{
-    position:absolute;
-    inset:0;
-    border-radius:999px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-  }
-  .ring{
-    width:110%;
-    height:110%;
-    border-radius:999px;
-    background: conic-gradient(from 0deg, rgba(0,240,255,0.06), rgba(0,240,255,0.12));
-    filter: blur(8px);
-    opacity:0.9;
-    transform: rotate(0deg);
-    animation: ringRotate 6s linear infinite, ringPulse 2.6s ease-in-out infinite;
-  }
-  @keyframes ringRotate{ to{ transform: rotate(360deg) } }
-  @keyframes ringPulse{ 0%,100%{ opacity:.6; filter: blur(6px) } 50%{ opacity:1; filter: blur(2px) } }
-
-  .logo{
-    width:78px;
-    height:78px;
-    border-radius:999px;
-    overflow:hidden;
-    border: 2px solid rgba(0,240,255,0.14);
-    box-shadow: 0 6px 22px rgba(0,240,255,0.06), inset 0 -6px 18px rgba(0,0,0,0.6);
-    transform: translateZ(0);
-    animation: logoFloat 4.6s ease-in-out infinite;
-  }
-  @keyframes logoFloat{ 0%{ transform:translateY(0) } 50%{ transform:translateY(-4px) } 100%{ transform:translateY(0) } }
-
-  .logo img{ width:100%; height:100%; object-fit:cover; display:block; }
-
-  .title{
-    display:flex;
-    flex-direction:column;
-    gap:4px;
-  }
-  .player-name{
-    font-size:28px;
-    color:var(--neon-2);
-    text-shadow:0 0 18px rgba(0,240,255,0.18);
-    letter-spacing:1px;
-    position:relative;
-    overflow:visible;
-  }
-  /* shimmer effect */
-  .player-name::after{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.08) 55%, transparent 100%);
-    transform:translateX(-120%);
-    transition: none;
-    animation: shimmer 3.2s linear infinite;
-    mix-blend-mode:overlay;
-    opacity:0.9;
-    pointer-events:none;
-  }
-  @keyframes shimmer{ to{ transform:translateX(220%) } }
-
-  .subtitle{ font-size:12px; color:rgba(255,255,255,0.6); }
-
-  /* rest of UI content */
-  .hud{
-    margin-top:10px;
-    opacity:0;
-    transform:translateY(6px);
-    animation:fadeInUp .6s forwards .9s;
-  }
-  @keyframes fadeInUp{ to{ opacity:1; transform:none } }
-
-  .stats{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    margin-bottom:12px;
-  }
-  .xp-bar{
-    flex:1;
-    height:14px;
-    border-radius:8px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(0,240,255,0.04);
-    margin-top:8px;
-    overflow:hidden;
-  }
-  .xp-fill{
-    height:100%;
-    background:linear-gradient(90deg,var(--neon),var(--neon-2));
-    transition: width .8s cubic-bezier(.2,.9,.2,1);
-    box-shadow: 0 0 22px rgba(0,240,255,0.06);
-    width:0%;
-  }
-
-  /* grid & cards */
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:12px;
-    margin-top:14px;
-  }
-  .card{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:10px;
-    padding:12px;
-    border:1px solid rgba(0,240,255,0.04);
-  }
-
-  .card .label{ color:rgba(255,255,255,0.7); font-size:13px; }
-  .card .value{ font-size:20px; color:var(--neon-2); margin-top:6px; }
-
-  .controls{ text-align:center; margin-top:14px; display:flex; gap:10px; justify-content:center; }
-  .btn{ background:transparent; color:var(--neon-2); padding:8px 12px; border-radius:8px; border:1px solid rgba(0,240,255,0.08); cursor:pointer; }
-  .btn:hover{ background:rgba(0,240,255,0.04) }
-
-  .log{ margin-top:12px; max-height:140px; overflow:auto; padding:10px; background:rgba(0,0,0,0.45); border-radius:8px; border:1px solid rgba(0,240,255,0.03); font-size:13px; }
-  .log .sys{ color:var(--neon-2); margin-bottom:8px; }
-
-  /* responsive */
-  @media (max-width:720px){
-    .grid{ grid-template-columns:1fr; }
-    .header{ gap:10px }
-    .logo-wrap{ width:72px; height:72px; }
-    .logo{ width:64px; height:64px; }
-    .player-name{ font-size:20px; }
-  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .logo img{width:100%;height:100%;border-radius:50%;border:2px solid rgba(0,240,255,0.15);}
+  .player-name{font-size:28px;color:var(--neon-2);text-shadow:0 0 18px rgba(0,240,255,0.18);position:relative;}
+  .hud{opacity:0;animation:fadeInUp .8s forwards .9s;}
+  @keyframes fadeInUp{to{opacity:1;transform:none;}}
+  .stats{display:flex;justify-content:space-between;margin-bottom:12px;}
+  .xp-bar{height:14px;border-radius:8px;background:rgba(255,255,255,0.05);overflow:hidden;}
+  .xp-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--neon-2));width:0%;transition:width .8s;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;border:1px solid rgba(0,240,255,0.04);}
+  .label{color:rgba(255,255,255,0.7);}
+  .value{font-size:20px;color:var(--neon-2);}
+  .btn{background:transparent;color:var(--neon-2);padding:8px 12px;border-radius:8px;border:1px solid rgba(0,240,255,0.08);cursor:pointer;}
+  .controls{text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;}
+  .log{margin-top:12px;max-height:140px;overflow:auto;padding:10px;background:rgba(0,0,0,0.45);border-radius:8px;font-size:13px;}
 </style>
 </head>
 <body>
-
-<!-- Activation overlay so audio can be started by user gesture -->
-<div id="activateOverlay" class="activate-overlay" aria-hidden="false">
-  <div class="activate-card">
-    <div style="font-size:18px; color:var(--neon-2); font-weight:700">Activate System</div>
-    <div class="activate-sub">Click to awaken the System — faint summoning sound will play.</div>
-    <button id="activateBtn" class="activate-btn">ACTIVATE</button>
-  </div>
-</div>
-
-<div class="frame" role="application" aria-label="Solo Leveling UI">
-  <!-- Header -->
+<div class="frame">
   <div class="header">
     <div class="logo-wrap">
-      <div class="mana-ring"><div class="ring" aria-hidden="true"></div></div>
-      <div class="logo" title="Dark Genesis emblem">
-        <!-- local uploaded image path (update if you host elsewhere) -->
-        <img src="logo.jpg" alt="Dark Genesis logo" />
-      </div>
+      <div class="mana-ring"></div>
+      <div class="logo"><img src="/mnt/data/solo-leveling-qual-e-a-habilidade-mais-poderosa-de-sung-jinwoo.jpg" alt="Dark Genesis Logo"></div>
     </div>
-
-    <div class="title">
-      <div class="player-name">Dark Genesis</div>
-      <div class="subtitle small">System Activated — Solo Leveling IRL</div>
-    </div>
+    <div><div class="player-name">Dark Genesis</div><div style="font-size:12px;color:#aaa;">System Activated — Solo Leveling IRL</div></div>
   </div>
 
-  <!-- HUD content (keeps Firebase logic) -->
   <div class="hud">
     <div class="stats">
-      <div style="min-width:220px">
-        <div class="small">LEVEL <strong id="level">1</strong> &nbsp;•&nbsp; RANK <strong id="rank">E</strong></div>
-        <div class="xp-bar" aria-hidden="true"><div id="xpFill" class="xp-fill"></div></div>
-        <div class="small" id="xpLabel" style="margin-top:6px; color:rgba(255,255,255,0.6)">XP: <span id="xp">0</span></div>
+      <div>
+        <div>LEVEL <strong id="level">1</strong> • RANK <strong id="rank">E</strong></div>
+        <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+        <div id="xpLabel" style="margin-top:6px;">XP: <span id="xp">0</span></div>
       </div>
-
-      <div style="min-width:220px; text-align:right">
-        <div class="small">Daily completions</div>
-        <div style="font-size:20px; color:var(--neon-2)" id="completions">0</div>
-      </div>
+      <div>Daily completions<br><span id="completions" style="font-size:20px;color:var(--neon-2)">0</span></div>
     </div>
 
-    <div class="grid" aria-live="polite">
+    <div class="grid">
       <div class="card">
         <div class="label">Pushups</div>
-        <div class="value"><span id="pushups">0</span>/100</div>
-        <div style="margin-top:8px"><button class="btn" onclick="addExercise('pushups',5)">+5</button><button class="btn" onclick="addExercise('pushups',10)">+10</button></div>
+        <div class="value"><span id="pushups">0</span>/50</div>
+        <div><button class="btn" onclick="addExercise('pushups',5)">+5</button><button class="btn" onclick="addExercise('pushups',10)">+10</button></div>
       </div>
-
       <div class="card">
         <div class="label">Squats</div>
-        <div class="value"><span id="squats">0</span>/100</div>
-        <div style="margin-top:8px"><button class="btn" onclick="addExercise('squats',5)">+5</button><button class="btn" onclick="addExercise('squats',10)">+10</button></div>
+        <div class="value"><span id="squats">0</span>/50</div>
+        <div><button class="btn" onclick="addExercise('squats',5)">+5</button><button class="btn" onclick="addExercise('squats',10)">+10</button></div>
       </div>
-
       <div class="card">
         <div class="label">Situps</div>
-        <div class="value"><span id="situps">0</span>/100</div>
-        <div style="margin-top:8px"><button class="btn" onclick="addExercise('situps',5)">+5</button><button class="btn" onclick="addExercise('situps',10)">+10</button></div>
+        <div class="value"><span id="situps">0</span>/50</div>
+        <div><button class="btn" onclick="addExercise('situps',5)">+5</button><button class="btn" onclick="addExercise('situps',10)">+10</button></div>
       </div>
-
       <div class="card">
         <div class="label">Run (km)</div>
-        <div class="value"><span id="run">0</span>/10</div>
-        <div style="margin-top:8px"><button class="btn" onclick="addExercise('run',0.5)">+0.5</button><button class="btn" onclick="addExercise('run',1)">+1</button></div>
+        <div class="value"><span id="run">0</span>/5</div>
+        <div><button class="btn" onclick="addExercise('run',0.5)">+0.5</button><button class="btn" onclick="addExercise('run',1)">+1</button></div>
       </div>
     </div>
 
@@ -297,206 +106,69 @@
       <button class="btn" onclick="completeDaily()">Complete Daily</button>
       <button class="btn" onclick="resetAll()">Reset All</button>
     </div>
-
-    <div class="log" id="log" aria-live="polite"></div>
+    <div class="log" id="log"></div>
   </div>
 </div>
 
-<!-- Firebase + WebAudio + UI logic -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-  /* ========== FIREBASE CONFIG ========== */
-  const firebaseConfig = {
-    apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
-    authDomain: "shadowgymsystem.firebaseapp.com",
-    projectId: "shadowgymsystem",
-    storageBucket: "shadowgymsystem.firebasestorage.app",
-    messagingSenderId: "396589716297",
-    appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
-    measurementId: "G-K0BMF5SG2K"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const ref = doc(db,"playerStats","mainPlayer");
+const firebaseConfig = {
+  apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
+  authDomain: "shadowgymsystem.firebaseapp.com",
+  projectId: "shadowgymsystem",
+  storageBucket: "shadowgymsystem.firebasestorage.app",
+  messagingSenderId: "396589716297",
+  appId: "1:396589716297:web:4c65a39d7ae2d9981c4098",
+  measurementId: "G-K0BMF5SG2K"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = doc(db,"playerStats","mainPlayer");
 
-  /* ========== WebAudio Summon / Level sounds ========== */
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  let audioCtx = null;
-  function ensureAudio(){
-    if(!audioCtx) audioCtx = new AudioCtx();
-    if(audioCtx.state === 'suspended') audioCtx.resume();
+function getTodayDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function log(msg){const el=document.getElementById('log');const p=document.createElement('div');p.textContent='[SYSTEM] '+msg;el.prepend(p);}
+function rankFromLevel(l){if(l<10)return'E';if(l<25)return'D';if(l<50)return'C';if(l<75)return'B';if(l<90)return'A';return'S';}
+async function gainXp(amount){const s=await getDoc(ref);if(!s.exists())return;let d=s.data();let xp=(d.xp||0)+amount;let lvl=d.level||1;let up=false;
+while(xp>=Math.floor(100*Math.pow(1.15,lvl-1))&&lvl<100){xp-=Math.floor(100*Math.pow(1.15,lvl-1));lvl++;up=true;}
+await updateDoc(ref,{xp,level:lvl});if(up)log('LEVEL UP → '+lvl);}
+
+onSnapshot(ref,s=>{if(!s.exists())return;let d=s.data();const next=Math.floor(100*Math.pow(1.15,(d.level||1)-1));
+document.getElementById('level').textContent=d.level||1;
+document.getElementById('rank').textContent=rankFromLevel(d.level||1);
+document.getElementById('xp').textContent=`${d.xp||0}/${next}`;
+document.getElementById('xpFill').style.width=Math.min(100,(d.xp||0)/next*100)+'%';
+['pushups','squats','situps','run'].forEach(k=>document.getElementById(k).textContent=d[k]||0);
+document.getElementById('completions').textContent=d.completions||0;
+});
+
+async function addExercise(type,val){
+  await updateDoc(ref,{[type]:increment(val)});
+  const s=await getDoc(ref);if(!s.exists())return;let d=s.data();
+  if((d.pushups||0)>=50&&(d.squats||0)>=50&&(d.situps||0)>=50&&(d.run||0)>=5){
+    const bonus=(d.completions>0)?50:125;
+    await updateDoc(ref,{completions:increment(1)});
+    await gainXp(bonus);
+    log(`Daily goal completed (+${bonus} XP)`);
   }
-  // simple tone helper
-  function tone(freq, duration=0.16, type='sine', gain=0.06){
-    if(!audioCtx) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type; o.frequency.value = freq;
-    g.gain.value = gain;
-    o.connect(g); g.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-    o.start(now);
-    o.stop(now + duration);
-  }
+}
+async function completeDaily(){
+  const s=await getDoc(ref);if(!s.exists())return;let d=s.data();
+  const bonus=(d.completions>0)?50:125;
+  await updateDoc(ref,{completions:increment(1)});
+  await gainXp(bonus);
+  log(`Manual daily (+${bonus} XP)`);
+}
+async function resetAll(){
+  if(!confirm('Reset all progress?'))return;
+  await setDoc(ref,{level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastReset:getTodayDate()});
+  log('System reset.');
+}
+setInterval(async()=>{const s=await getDoc(ref);if(!s.exists())return;let d=s.data();if(d.lastReset!==getTodayDate()){await updateDoc(ref,{pushups:0,squats:0,situps:0,run:0,completions:0,lastReset:getTodayDate()});log('Daily reset.');}},60000);
+window.addExercise=addExercise;window.completeDaily=completeDaily;window.resetAll=resetAll;
 
-  function playSummon(){
-    ensureAudio();
-    // deep subtle hum
-    tone(120, 0.6, 'sine', 0.045);
-    setTimeout(()=>tone(220,0.18,'sine',0.06), 180);
-    setTimeout(()=>tone(660,0.12,'triangle',0.035), 350);
-  }
-  function playLevelUp(){
-    ensureAudio();
-    tone(880,0.18,'sine',0.08);
-    setTimeout(()=>tone(1320,0.14,'triangle',0.06), 140);
-    setTimeout(()=>tone(1760,0.07,'sine',0.04), 260);
-  }
-
-  /* ========== UI helpers and Firebase interaction ========== */
-  function getTodayDate(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-  function log(msg){ const el=document.getElementById('log'); const p=document.createElement('div'); p.className='sys'; p.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`; el.prepend(p); }
-
-  // listen realtime
-  onSnapshot(ref, snap=>{
-    if(!snap.exists()) return;
-    const data = snap.data();
-    const xpToNext = Math.max(1, Math.floor(100 * Math.pow(1.15, (data.level||1)-1)));
-    const pct = Math.min(100, (data.xp||0)/xpToNext*100);
-    document.getElementById('level').textContent = data.level||1;
-    document.getElementById('rank').textContent = rankFromLevel(data.level||1);
-    document.getElementById('xp').textContent = `${data.xp||0}/${xpToNext}`;
-    document.getElementById('xpFill').style.width = pct+'%';
-    document.getElementById('pushups').textContent = data.pushups||0;
-    document.getElementById('squats').textContent = data.squats||0;
-    document.getElementById('situps').textContent = data.situps||0;
-    document.getElementById('run').textContent = data.run||0;
-    document.getElementById('completions').textContent = data.completions||0;
-
-    // transient flags (sound + animation)
-    if(data.justCompletedDaily){
-      playSummon();
-      log('Daily completed (sound played).');
-    }
-    if(data.levelBumped){
-      playLevelUp();
-      log(`LEVEL UP → ${data.level}`);
-    }
-    // clear flags (transient)
-    if(data.justCompletedDaily || data.levelBumped){
-      updateDoc(ref, { justCompletedDaily:false, levelBumped:false }).catch(()=>{});
-    }
-  });
-
-  function rankFromLevel(l){
-    if(l < 10) return 'E';
-    if(l < 25) return 'D';
-    if(l < 50) return 'C';
-    if(l < 75) return 'B';
-    if(l < 90) return 'A';
-    return 'S';
-  }
-
-  async function gainXp(amount, reason){
-    const snap = await getDoc(ref);
-    if(!snap.exists()) return;
-    let d = snap.data();
-    let xp = (d.xp||0) + amount;
-    let lvl = d.level || 1;
-    let bumped = false;
-    while(xp >= Math.floor(100*Math.pow(1.15, lvl-1)) && lvl < 100){
-      xp -= Math.floor(100*Math.pow(1.15, lvl-1));
-      lvl++; bumped = true;
-    }
-    const updates = { xp, level: lvl };
-    if(bumped) updates.levelBumped = true;
-    await updateDoc(ref, updates);
-    log(`+${amount} XP (${reason})`);
-  }
-
-  async function addExercise(type, val){
-    await updateDoc(ref, { [type]: increment(val) });
-    // check completion and award XP
-    const snap = await getDoc(ref);
-    if(!snap.exists()) return;
-    const d = snap.data();
-    if((d.pushups||0) >= 100 && (d.squats||0) >= 100 && (d.situps||0) >= 100 && (d.run||0) >= 10){
-      const bonus = (d.completions && d.completions > 0) ? 100 : 250;
-      // mark justCompletedDaily before awarding xp so UI can react
-      await updateDoc(ref, { completions: increment(1), justCompletedDaily: true });
-      await gainXp(bonus, 'Daily goal');
-      log(`Daily goal completed (+${bonus} XP)`);
-    }
-  }
-
-  async function completeDaily(){
-    // manual complete => just award xp and increment completions
-    const snap = await getDoc(ref);
-    if(!snap.exists()) return;
-    const d = snap.data();
-    const bonus = (d.completions && d.completions > 0) ? 100 : 250;
-    await updateDoc(ref, { completions: increment(1), justCompletedDaily: true });
-    await gainXp(bonus, 'Manual daily');
-    log(`Manual daily completion (+${bonus} XP)`);
-  }
-
-  async function resetAll(){
-    if(!confirm('Reset all progress?')) return;
-    await setDoc(ref, { level:1, xp:0, pushups:0, squats:0, situps:0, run:0, completions:0, lastReset: getTodayDate() });
-    log('System reset.');
-  }
-
-  // daily reset check (server timestamping via client - runs once per minute)
-  async function checkDailyReset(){
-    const snap = await getDoc(ref);
-    if(!snap.exists()) return;
-    const d = snap.data();
-    const today = getTodayDate();
-    if(d.lastReset !== today){
-      await updateDoc(ref, { pushups:0, squats:0, situps:0, run:0, completions:0, lastReset: today });
-      log('[SYSTEM]: Daily reset completed.');
-    }
-  }
-  setInterval(checkDailyReset, 60*1000);
-  checkDailyReset();
-
-  // expose for buttons
-  window.addExercise = addExercise;
-  window.resetAll = resetAll;
-  window.completeDaily = completeDaily;
-
-  /* ========== Activation overlay to enable audio (user gesture) ========== */
-  const overlay = document.getElementById('activateOverlay');
-  const btn = document.getElementById('activateBtn');
-  btn.addEventListener('click', async () => {
-    // create/resume audio context by user gesture
-    ensureAudio();
-    // play a small summon then open overlay
-    playSummon();
-    overlay.style.transition = 'opacity .6s ease';
-    overlay.style.opacity = 0;
-    setTimeout(()=>{ overlay.remove(); }, 700);
-    // subtle intro log + HUD reveal
-    log('[SYSTEM]: Interface activated.');
-  });
-
-  // also allow clicking overlay background to activate
-  overlay.addEventListener('click', (ev)=>{
-    if(ev.target === overlay) btn.click();
-  });
-
-  // ensure the Firebase doc exists (initial bootstrap) — creates default structure if missing
-  (async function ensureDoc(){
-    const snap = await getDoc(ref);
-    if(!snap.exists()){
-      await setDoc(ref, { level:1, xp:0, pushups:0, squats:0, situps:0, run:0, completions:0, lastReset: getTodayDate(), justCompletedDaily:false, levelBumped:false });
-      log('[SYSTEM]: Initializing player record.');
-    }
-  })();
-
+(async()=>{const s=await getDoc(ref);if(!s.exists()){await setDoc(ref,{level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastReset:getTodayDate()});log('Initialized.');}})();
 </script>
 </body>
 </html>
-
