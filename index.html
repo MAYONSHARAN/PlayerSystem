@@ -161,6 +161,12 @@ body {
   transition: width 1s ease;
 }
 
+.rank-display {
+  margin-top: 10px;
+  font-size: 1.1em;
+  text-shadow: 0 0 10px #00eaff;
+}
+
 /* ===== TASKS ===== */
 .task-list {
   text-align: left;
@@ -218,6 +224,7 @@ button:disabled { background: #333; color: #777; cursor: not-allowed; }
       <div class="xp-fill" id="xpFill"></div>
     </div>
     <p id="xpText">0 / 1000 XP</p>
+    <div class="rank-display" id="rankText">Rank: E-Rank Hunter</div>
   </div>
 
   <div class="task-list">
@@ -240,17 +247,33 @@ let level = 1;
 let xpNeeded = 1000;
 let completedToday = false;
 
+function updateRank() {
+  let rank = "E-Rank Hunter";
+  if (level >= 10 && level < 25) rank = "D-Rank Hunter";
+  else if (level >= 25 && level < 50) rank = "C-Rank Hunter";
+  else if (level >= 50 && level < 70) rank = "B-Rank Hunter";
+  else if (level >= 70 && level < 90) rank = "A-Rank Hunter";
+  else if (level >= 90) rank = "S-Rank Hunter";
+  document.getElementById("rankText").innerText = "Rank: " + rank;
+}
+
 function updateUI() {
   document.getElementById("xpText").innerText = xp + " / " + xpNeeded + " XP";
   document.getElementById("level").innerText = "Level " + level;
   document.getElementById("xpFill").style.width = (xp / xpNeeded) * 100 + "%";
+  updateRank();
 }
 
 function levelUp() {
-  while (xp >= xpNeeded) {
+  while (xp >= xpNeeded && level < 100) {
     xp -= xpNeeded;
     level++;
-    xpNeeded = Math.floor(xpNeeded * 1.2);
+    if (level < 10) xpNeeded = 1000;
+    else if (level < 25) xpNeeded = 1500;
+    else if (level < 50) xpNeeded = 2000;
+    else if (level < 70) xpNeeded = 2500;
+    else if (level < 90) xpNeeded = 3000;
+    else xpNeeded = 4000;
   }
   updateUI();
 }
@@ -284,10 +307,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 });
 
 function saveProgress() {
-  const data = {
-    xp, level, xpNeeded, completedToday,
-    date: new Date().toDateString()
-  };
+  const data = { xp, level, xpNeeded, completedToday, date: new Date().toDateString() };
   localStorage.setItem("darkGenesisData", JSON.stringify(data));
 }
 
