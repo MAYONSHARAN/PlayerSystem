@@ -3,60 +3,53 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dark Genesis — Player System</title>
+<title>Dark Genesis — Solo Leveling IRL</title>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-  :root{
+  :root {
     --neon:#00f0ff;
-    --neon-2:#00ffff;
     --bg:#03060a;
   }
-  body{
+  body {
     margin:0;
-    background: radial-gradient(circle at 20% 10%, #071022 0%, #000 35%);
+    background:radial-gradient(circle at 30% 10%, #0a1a2f 0%, #000 80%);
+    font-family:'Orbitron',sans-serif;
     color:var(--neon);
-    font-family:'Orbitron',system-ui;
     display:flex;
     justify-content:center;
-    padding:36px 12px;
+    padding:40px 12px;
   }
-  .frame{
+  .frame {
     width:900px;max-width:95%;
-    background:rgba(0,0,0,0.6);
-    border-radius:14px;
-    padding:22px;
-    border:1px solid rgba(0,240,255,0.08);
-    box-shadow:0 20px 60px rgba(0,16,30,0.7);
+    background:rgba(0,0,0,0.65);
+    border-radius:16px;
+    padding:28px;
+    border:1px solid rgba(0,240,255,0.1);
+    box-shadow:0 0 60px rgba(0,240,255,0.15);
   }
-
-  .header{
-    display:flex;align-items:center;gap:16px;margin-bottom:14px;
-    opacity:0;animation:fadeIn .8s ease-out forwards .15s;
+  .header {
+    display:flex;align-items:center;gap:16px;margin-bottom:20px;
+    animation:fadeIn 1s ease-out forwards;
   }
-  @keyframes fadeIn{to{opacity:1;}}
-  .logo-wrap{position:relative;width:88px;height:88px;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:none;}}
+  .logo-wrap{position:relative;width:90px;height:90px;}
   .mana-ring{position:absolute;inset:0;border-radius:50%;overflow:hidden;}
-  .mana-ring::before{
-    content:"";position:absolute;inset:0;border-radius:50%;
-    background:conic-gradient(from 0deg, rgba(0,240,255,0.1), rgba(0,240,255,0.3));
-    animation:spin 6s linear infinite;
-  }
+  .mana-ring::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg, rgba(0,240,255,0.05), rgba(0,240,255,0.3));animation:spin 6s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .logo img{width:100%;height:100%;border-radius:50%;border:2px solid rgba(0,240,255,0.15);}
-  .player-name{font-size:28px;color:var(--neon-2);text-shadow:0 0 18px rgba(0,240,255,0.18);position:relative;}
-  .hud{opacity:0;animation:fadeInUp .8s forwards .9s;}
-  @keyframes fadeInUp{to{opacity:1;transform:none;}}
-  .stats{display:flex;justify-content:space-between;margin-bottom:12px;}
+  .player-name{font-size:30px;color:var(--neon);text-shadow:0 0 15px rgba(0,240,255,0.3);}
+  .hud{opacity:0;animation:fadeInUp 1s forwards 1s;}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
   .xp-bar{height:14px;border-radius:8px;background:rgba(255,255,255,0.05);overflow:hidden;}
-  .xp-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--neon-2));width:0%;transition:width .8s;}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-  .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;border:1px solid rgba(0,240,255,0.04);}
-  .label{color:rgba(255,255,255,0.7);}
-  .value{font-size:20px;color:var(--neon-2);}
-  .btn{background:transparent;color:var(--neon-2);padding:8px 12px;border-radius:8px;border:1px solid rgba(0,240,255,0.08);cursor:pointer;}
-  .controls{text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;}
-  .log{margin-top:12px;max-height:140px;overflow:auto;padding:10px;background:rgba(0,0,0,0.45);border-radius:8px;font-size:13px;}
+  .xp-fill{height:100%;background:linear-gradient(90deg,var(--neon),#6fffff);width:0%;transition:width .8s;}
+  .tasks{margin-top:18px;}
+  .task{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);padding:10px 12px;border-radius:10px;margin-bottom:8px;border:1px solid rgba(0,240,255,0.05);}
+  .task input[type=checkbox]{transform:scale(1.3);cursor:pointer;}
+  .label{font-size:15px;color:#aff;}
+  .controls{text-align:center;margin-top:16px;}
+  .btn{background:transparent;color:var(--neon);border:1px solid rgba(0,240,255,0.2);padding:8px 16px;border-radius:8px;cursor:pointer;margin:0 4px;}
+  .log{margin-top:16px;max-height:150px;overflow:auto;background:rgba(0,0,0,0.4);padding:10px;border-radius:8px;font-size:13px;}
 </style>
 </head>
 <body>
@@ -64,57 +57,44 @@
   <div class="header">
     <div class="logo-wrap">
       <div class="mana-ring"></div>
-      <div class="logo"><img alt="Dark Genesis logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QC8RXhpZgAASUkqAAgAAAAGABIBAwABAAAAAQAAABoBBQABAAAAVgAAABsBBQABAAAAXgAAABwBBQABAAAAZgAAACgBAwABAAAAAgAAADEBAgAOAAAAcgAAADIBAgAUAAAAkAAAAGmHBAABAAAA0gAAAP/bAEMAAwICAwICAwMDAwMEBQQFBQQGBgYGBwYGBgcHBwgJCgkJCQkKCgsODg4QERATFhQVFRcYGBgZ/8AAEQgAAgACAwERAAIRAQMRAf/EAB8AAAEFAQEBAAAAAAAAAAAAAAABAgMFBgcICQoL/...
-(complete base64 continues — full tag in the file I prepared)
-</div>
+      <div class="logo"><img src="assets/logo.jpg" alt="Dark Genesis Logo"></div>
     </div>
-    <div><div class="player-name">Dark Genesis</div><div style="font-size:12px;color:#aaa;">System Activated — Solo Leveling IRL</div></div>
+    <div>
+      <div class="player-name">Dark Genesis</div>
+      <div style="font-size:12px;color:#aaa;">System Online — Solo Leveling IRL</div>
+    </div>
   </div>
 
   <div class="hud">
-    <div class="stats">
-      <div>
-        <div>LEVEL <strong id="level">1</strong> • RANK <strong id="rank">E</strong></div>
-        <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
-        <div id="xpLabel" style="margin-top:6px;">XP: <span id="xp">0</span></div>
-      </div>
-      <div>Daily completions<br><span id="completions" style="font-size:20px;color:var(--neon-2)">0</span></div>
+    <div style="margin-bottom:12px;">
+      LEVEL <strong id="level">1</strong> • RANK <strong id="rank">E</strong>
+      <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+      <div style="font-size:14px;margin-top:4px;">XP: <span id="xp">0</span></div>
+      <div>Daily completions: <span id="completions">0</span></div>
     </div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="label">Pushups</div>
-        <div class="value"><span id="pushups">0</span>/50</div>
-        <div><button class="btn" onclick="addExercise('pushups',5)">+5</button><button class="btn" onclick="addExercise('pushups',10)">+10</button></div>
-      </div>
-      <div class="card">
-        <div class="label">Squats</div>
-        <div class="value"><span id="squats">0</span>/50</div>
-        <div><button class="btn" onclick="addExercise('squats',5)">+5</button><button class="btn" onclick="addExercise('squats',10)">+10</button></div>
-      </div>
-      <div class="card">
-        <div class="label">Situps</div>
-        <div class="value"><span id="situps">0</span>/50</div>
-        <div><button class="btn" onclick="addExercise('situps',5)">+5</button><button class="btn" onclick="addExercise('situps',10)">+10</button></div>
-      </div>
-      <div class="card">
-        <div class="label">Run (km)</div>
-        <div class="value"><span id="run">0</span>/5</div>
-        <div><button class="btn" onclick="addExercise('run',0.5)">+0.5</button><button class="btn" onclick="addExercise('run',1)">+1</button></div>
-      </div>
+    <div class="tasks" id="taskList">
+      <div class="task"><input type="checkbox" id="warmup"><span class="label">Warm-up – 5 min jog or jump rope</span></div>
+      <div class="task"><input type="checkbox" id="pushups"><span class="label">Push-ups – 3 sets × 15</span></div>
+      <div class="task"><input type="checkbox" id="squats"><span class="label">Squats – 3 sets × 20</span></div>
+      <div class="task"><input type="checkbox" id="situps"><span class="label">Sit-ups – 3 sets × 20</span></div>
+      <div class="task"><input type="checkbox" id="plank"><span class="label">Plank – 3 × 30 sec holds</span></div>
+      <div class="task"><input type="checkbox" id="run"><span class="label">Optional – 5 km run or brisk 30-min walk</span></div>
+      <div class="task"><input type="checkbox" id="stretch"><span class="label">Stretch for 5 min</span></div>
     </div>
 
     <div class="controls">
       <button class="btn" onclick="completeDaily()">Complete Daily</button>
       <button class="btn" onclick="resetAll()">Reset All</button>
     </div>
+
     <div class="log" id="log"></div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD7czNVSA8aGVYumFKfkUiKChYz3QhuSLo",
@@ -127,54 +107,119 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const ref = doc(db,"playerStats","mainPlayer");
+const ref = doc(db, "playerStats", "mainPlayer");
 
-function getTodayDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function log(msg){const el=document.getElementById('log');const p=document.createElement('div');p.textContent='[SYSTEM] '+msg;el.prepend(p);}
-function rankFromLevel(l){if(l<10)return'E';if(l<25)return'D';if(l<50)return'C';if(l<75)return'B';if(l<90)return'A';return'S';}
-async function gainXp(amount){const s=await getDoc(ref);if(!s.exists())return;let d=s.data();let xp=(d.xp||0)+amount;let lvl=d.level||1;let up=false;
-while(xp>=Math.floor(100*Math.pow(1.15,lvl-1))&&lvl<100){xp-=Math.floor(100*Math.pow(1.15,lvl-1));lvl++;up=true;}
-await updateDoc(ref,{xp,level:lvl});if(up)log('LEVEL UP → '+lvl);}
+function getTodayDate(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
-onSnapshot(ref,s=>{if(!s.exists())return;let d=s.data();const next=Math.floor(100*Math.pow(1.15,(d.level||1)-1));
-document.getElementById('level').textContent=d.level||1;
-document.getElementById('rank').textContent=rankFromLevel(d.level||1);
-document.getElementById('xp').textContent=`${d.xp||0}/${next}`;
-document.getElementById('xpFill').style.width=Math.min(100,(d.xp||0)/next*100)+'%';
-['pushups','squats','situps','run'].forEach(k=>document.getElementById(k).textContent=d[k]||0);
-document.getElementById('completions').textContent=d.completions||0;
+function log(msg){
+  const el=document.getElementById('log');
+  const p=document.createElement('div');
+  p.textContent='[SYSTEM] '+msg;
+  el.prepend(p);
+}
+
+function rankFromLevel(l){
+  if(l<10)return'E';
+  if(l<25)return'D';
+  if(l<50)return'C';
+  if(l<75)return'B';
+  if(l<90)return'A';
+  return'S';
+}
+
+async function gainXp(amount){
+  const s=await getDoc(ref);
+  if(!s.exists())return;
+  let d=s.data();
+  let xp=(d.xp||0)+amount;
+  let lvl=d.level||1;
+  let up=false;
+  while(xp>=Math.floor(100*Math.pow(1.15,lvl-1))&&lvl<100){
+    xp-=Math.floor(100*Math.pow(1.15,lvl-1));
+    lvl++;up=true;
+  }
+  await updateDoc(ref,{xp,level:lvl});
+  if(up)log('LEVEL UP → '+lvl);
+}
+
+onSnapshot(ref,s=>{
+  if(!s.exists())return;
+  let d=s.data();
+  const next=Math.floor(100*Math.pow(1.15,(d.level||1)-1));
+  document.getElementById('level').textContent=d.level||1;
+  document.getElementById('rank').textContent=rankFromLevel(d.level||1);
+  document.getElementById('xp').textContent=`${d.xp||0}/${next}`;
+  document.getElementById('xpFill').style.width=Math.min(100,(d.xp||0)/next*100)+'%';
+  document.getElementById('completions').textContent=d.completions||0;
+  const tasks=d.tasks||{};
+  for(const k in tasks){
+    const cb=document.getElementById(k);
+    if(cb)cb.checked=tasks[k];
+  }
 });
 
-async function addExercise(type,val){
-  await updateDoc(ref,{[type]:increment(val)});
-  const s=await getDoc(ref);if(!s.exists())return;let d=s.data();
-  if((d.pushups||0)>=50&&(d.squats||0)>=50&&(d.situps||0)>=50&&(d.run||0)>=5){
-    const bonus=(d.completions>0)?50:125;
-    await updateDoc(ref,{completions:increment(1)});
-    await gainXp(bonus);
-    log(`Daily goal completed (+${bonus} XP)`);
+async function updateTask(id,checked){
+  const s=await getDoc(ref);
+  if(!s.exists())return;
+  const d=s.data();
+  const tasks={...d.tasks,[id]:checked};
+  await updateDoc(ref,{tasks});
+  checkAll(tasks,d.completions||0);
+}
+
+async function checkAll(tasks,completions){
+  const allDone=["warmup","pushups","squats","situps","plank","run","stretch"].every(k=>tasks[k]);
+  if(allDone){
+    const xpReward=completions>0?200:400;
+    await gainXp(xpReward);
+    await updateDoc(ref,{completions:completions+1});
+    log(`Daily workout complete! (+${xpReward} XP)`);
   }
 }
+
+document.querySelectorAll('.task input[type=checkbox]').forEach(cb=>{
+  cb.addEventListener('change',()=>updateTask(cb.id,cb.checked));
+});
+
 async function completeDaily(){
-  const s=await getDoc(ref);if(!s.exists())return;let d=s.data();
-  const bonus=(d.completions>0)?50:125;
-  await updateDoc(ref,{completions:increment(1)});
-  await gainXp(bonus);
-  log(`Manual daily (+${bonus} XP)`);
+  const s=await getDoc(ref);
+  if(!s.exists())return;
+  const d=s.data();
+  const xpReward=(d.completions>0)?200:400;
+  await gainXp(xpReward);
+  await updateDoc(ref,{completions:(d.completions||0)+1});
+  log(`Manual complete (+${xpReward} XP)`);
 }
+
 async function resetAll(){
   if(!confirm('Reset all progress?'))return;
-  await setDoc(ref,{level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastReset:getTodayDate()});
+  await setDoc(ref,{level:1,xp:0,completions:0,lastReset:getTodayDate(),tasks:{}});
   log('System reset.');
 }
-setInterval(async()=>{const s=await getDoc(ref);if(!s.exists())return;let d=s.data();if(d.lastReset!==getTodayDate()){await updateDoc(ref,{pushups:0,squats:0,situps:0,run:0,completions:0,lastReset:getTodayDate()});log('Daily reset.');}},60000);
-window.addExercise=addExercise;window.completeDaily=completeDaily;window.resetAll=resetAll;
 
-(async()=>{const s=await getDoc(ref);if(!s.exists()){await setDoc(ref,{level:1,xp:0,pushups:0,squats:0,situps:0,run:0,completions:0,lastReset:getTodayDate()});log('Initialized.');}})();
+setInterval(async()=>{
+  const s=await getDoc(ref);
+  if(!s.exists())return;
+  const d=s.data();
+  if(d.lastReset!==getTodayDate()){
+    await updateDoc(ref,{tasks:{},completions:0,lastReset:getTodayDate()});
+    log('New day — daily reset complete.');
+  }
+},60000);
+
+window.completeDaily=completeDaily;
+window.resetAll=resetAll;
+
+(async()=>{
+  const s=await getDoc(ref);
+  if(!s.exists()){
+    await setDoc(ref,{level:1,xp:0,completions:0,lastReset:getTodayDate(),tasks:{}});
+    log('Initialized.');
+  }
+})();
 </script>
 </body>
 </html>
-
-
-
-
