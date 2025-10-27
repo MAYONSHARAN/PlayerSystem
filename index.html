@@ -15,54 +15,45 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== INTRO ===== */
+/* Intro animation */
 .intro-screen {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(10,10,20,1) 100%);
+  inset: 0;
+  background: radial-gradient(circle, #000 0%, #050511 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   z-index: 9999;
   animation: fadeOut 2s ease forwards;
-  animation-delay: 2s;
+  animation-delay: 2.5s;
 }
-
 .intro-text {
   color: #00eaff;
   font-size: 2em;
   text-align: center;
-  line-height: 1.4em;
   text-shadow: 0 0 25px #00eaff;
   opacity: 0;
   animation: introTextFade 2s ease-in-out forwards;
 }
-.intro-text span {
-  font-size: 1.5em;
-  font-weight: 700;
-  color: #00fff7;
-}
+.intro-text span { font-size: 1.5em; font-weight: 700; color: #00fff7; }
 
 @keyframes introTextFade {
-  0% { opacity: 0; transform: translateY(20px); }
-  50% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 1; }
+  0% {opacity:0; transform:translateY(20px);}
+  50% {opacity:1; transform:translateY(0);}
+  100% {opacity:1;}
 }
 @keyframes fadeOut {
-  0% { opacity: 1; }
-  90% { opacity: 0; }
-  100% { opacity: 0; visibility: hidden; }
+  0% {opacity:1;}
+  90% {opacity:0;}
+  100% {opacity:0; visibility:hidden;}
 }
 
-/* ===== HEADER ===== */
+/* Header */
 .header {
   text-align: center;
   padding-top: 40px;
-  position: relative;
 }
-
 .logo-section {
   display: flex;
   flex-direction: column;
@@ -72,7 +63,6 @@ body {
   animation: fadeIn 1.5s ease-in forwards;
   animation-delay: 2.5s;
 }
-
 .logo-wrap {
   position: relative;
   width: 110px;
@@ -82,7 +72,6 @@ body {
   justify-content: center;
   border-radius: 50%;
 }
-
 .mana-ring {
   position: absolute;
   width: 125%;
@@ -92,7 +81,6 @@ body {
   animation: pulseGlow 3s ease-in-out infinite;
   z-index: 0;
 }
-
 .logo img {
   width: 110px;
   height: 110px;
@@ -102,12 +90,10 @@ body {
   box-shadow: 0 0 25px rgba(0,240,255,0.4);
   z-index: 1;
 }
-
 @keyframes pulseGlow {
-  0%,100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%,100% {opacity:0.4; transform:scale(1);}
+  50% {opacity:0.8; transform:scale(1.05);}
 }
-
 .player-name {
   color: #00eaff;
   font-size: 1.6em;
@@ -116,15 +102,15 @@ body {
   animation: shimmer 5s linear infinite;
 }
 @keyframes shimmer {
-  0%,100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,100% {opacity:1;}
+  50% {opacity:0.7;}
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
 }
 
-/* ===== MAIN PANEL ===== */
+/* Container */
 .container {
   max-width: 500px;
   margin: 60px auto;
@@ -138,17 +124,10 @@ body {
   animation: fadeIn 1.5s ease-in forwards;
   animation-delay: 3s;
 }
-
-.level-display {
-  margin-bottom: 20px;
-}
-.level-display h2 {
-  margin: 0;
-  font-size: 1.3em;
-}
+.level-display { margin-bottom: 20px; }
+.level-display h2 { margin: 0; font-size: 1.3em; }
 .xp-bar {
-  width: 100%;
-  height: 15px;
+  width: 100%; height: 15px;
   background: rgba(0,0,0,0.4);
   border-radius: 10px;
   overflow: hidden;
@@ -160,18 +139,14 @@ body {
   width: 0%;
   transition: width 1s ease;
 }
-
 .rank-display {
   margin-top: 10px;
   font-size: 1.1em;
   text-shadow: 0 0 10px #00eaff;
 }
 
-/* ===== TASKS ===== */
-.task-list {
-  text-align: left;
-  margin-top: 20px;
-}
+/* Tasks */
+.task-list { text-align: left; margin-top: 20px; }
 .task-item {
   display: flex;
   align-items: center;
@@ -220,10 +195,8 @@ button:disabled { background: #333; color: #777; cursor: not-allowed; }
 <main class="container">
   <div class="level-display">
     <h2 id="level">Level 1</h2>
-    <div class="xp-bar">
-      <div class="xp-fill" id="xpFill"></div>
-    </div>
-    <p id="xpText">0 / 1000 XP</p>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+    <p id="xpText">0 / 120 XP</p>
     <div class="rank-display" id="rankText">Rank: E-Rank Hunter</div>
   </div>
 
@@ -234,7 +207,7 @@ button:disabled { background: #333; color: #777; cursor: not-allowed; }
     <label class="task-item"><input type="checkbox" class="task"> Sit-ups – 3 × 20</label>
     <label class="task-item"><input type="checkbox" class="task"> Plank – 3 × 30 sec</label>
     <label class="task-item"><input type="checkbox" class="task"> Optional – 5 km run / 30 min walk</label>
-    <label class="task-item"><input type="checkbox" class="task"> Stretch – 5 min cooldown</label>
+    <label class="task-item"><input type="checkbox" class="task"> Stretch – 5 min cool-down</label>
   </div>
 
   <button id="completeBtn">Complete Daily</button>
@@ -244,8 +217,17 @@ button:disabled { background: #333; color: #777; cursor: not-allowed; }
 <script>
 let xp = 0;
 let level = 1;
-let xpNeeded = 1000;
+let xpNeeded = 120;
 let completedToday = false;
+
+function calcXPNeeded(lv) {
+  if (lv < 10) return 120 + (lv - 1) * 40;
+  if (lv < 25) return 600 + (lv - 10) * 60;
+  if (lv < 50) return 1600 + (lv - 25) * 80;
+  if (lv < 70) return 3000 + (lv - 50) * 100;
+  if (lv < 90) return 4800 + (lv - 70) * 120;
+  return 7000 + (lv - 90) * 150;
+}
 
 function updateRank() {
   let rank = "E-Rank Hunter";
@@ -268,12 +250,7 @@ function levelUp() {
   while (xp >= xpNeeded && level < 100) {
     xp -= xpNeeded;
     level++;
-    if (level < 10) xpNeeded = 1000;
-    else if (level < 25) xpNeeded = 1500;
-    else if (level < 50) xpNeeded = 2000;
-    else if (level < 70) xpNeeded = 2500;
-    else if (level < 90) xpNeeded = 3000;
-    else xpNeeded = 4000;
+    xpNeeded = calcXPNeeded(level);
   }
   updateUI();
 }
@@ -281,10 +258,7 @@ function levelUp() {
 document.getElementById("completeBtn").addEventListener("click", () => {
   const tasks = document.querySelectorAll(".task");
   const allDone = Array.from(tasks).every(t => t.checked);
-  if (!allDone) {
-    alert("Complete all tasks first!");
-    return;
-  }
+  if (!allDone) return alert("Complete all tasks first!");
 
   const gained = completedToday ? 200 : 400;
   xp += gained;
@@ -296,13 +270,9 @@ document.getElementById("completeBtn").addEventListener("click", () => {
 
 document.getElementById("resetBtn").addEventListener("click", () => {
   if (confirm("Reset all progress?")) {
-    xp = 0;
-    level = 1;
-    xpNeeded = 1000;
-    completedToday = false;
+    xp = 0; level = 1; xpNeeded = 120; completedToday = false;
     document.querySelectorAll(".task").forEach(t => t.checked = false);
-    saveProgress();
-    updateUI();
+    saveProgress(); updateUI();
   }
 });
 
@@ -318,10 +288,7 @@ function loadProgress() {
       completedToday = false;
       document.querySelectorAll(".task").forEach(t => t.checked = false);
     } else {
-      xp = data.xp;
-      level = data.level;
-      xpNeeded = data.xpNeeded;
-      completedToday = data.completedToday;
+      xp = data.xp; level = data.level; xpNeeded = data.xpNeeded; completedToday = data.completedToday;
     }
   }
   updateUI();
